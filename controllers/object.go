@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"oyjtapi/models"
+	"oyjblog/models"
 	"encoding/json"
 
 	"github.com/astaxie/beego"

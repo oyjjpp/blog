@@ -8,7 +8,7 @@
 package routers
 
 import (
-	"oyjtapi/controllers"
+	"oyjblog/controllers"
 
 	"github.com/astaxie/beego"
 )
