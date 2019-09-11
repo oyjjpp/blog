@@ -2,7 +2,6 @@ package main
 
 import (
 	_ "oyjblog/routers"
-
 	"github.com/astaxie/beego"
 )
 
