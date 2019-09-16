@@ -43,6 +43,7 @@ func (u *UserController) GetAll() {
 // @Failure 403 :uid is empty
 // @router /:uid [get]
 func (u *UserController) Get() {
+	//获取":name" 类型参数 路由要设置为 RESTful 或者正则类型
 	uid := u.GetString(":uid")
 	if uid != "" {
 		user, err := models.GetUser(uid)

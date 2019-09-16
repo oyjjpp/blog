@@ -10,26 +10,42 @@ import (
 	"oyjblog/controllers"
 	"oyjblog/controllers/admin"
 	"github.com/astaxie/beego"
+	//"github.com/astaxie/beego/context"
 )
 
 func init() {
-    //固定路由
+	/*
+	//URL + 闭包函数组成
+	//此context不是golang标准包的 "github.com/astaxie/beego/context"
+	beego.Get("get_func", func(ctx *context.Context){
+		ctx.Output.Body([]byte("hello beego"))
+	})
+
+    //#####固定路由
     beego.Router("/", &controllers.UserController{}, "*:GetAll")
-    //包分目录情况
+	
+	//包分目录情况
     beego.Router("/admin/getall", &admin.UserController{}, "*:GetAll")
 
-
-    //RESTful 请求模式
+	//RESTful 请求模式
+	//http://localhost:8080/admin/object/hjkhsbnmn123
     beego.RESTRouter("/admin/object", &admin.ObjectController{})
     
 
-    //正则匹配
+    //#####正则匹配
 
     //自动匹配
     //函数名小写 http://47.98.161.8:8080/object/getall
     beego.AutoRouter(&controllers.ObjectController{})
-    
-	ns := beego.NewNamespace("/v1",
+	
+	
+	//自定义方法
+	beego.Router("/get/user", &controllers.UserController{}, "get:Get")
+
+	*/
+	//命名空间
+	/*
+	ns := beego.NewNamespace("/api",
 		beego.NSNamespace("/object",
 			beego.NSInclude(
 				&controllers.ObjectController{},
@@ -40,6 +56,28 @@ func init() {
 				&controllers.UserController{},
 			),
 		),
+		beego.NSNamespace("/admin/object",
+			beego.NSInclude(
+				&admin.ObjectController{},
+			),
+		),
+		beego.NSNamespace("/admin/user",
+			beego.NSInclude(
+				&admin.UserController{},
+			),
+		),
 	)
+	*/
+	ns := beego.NewNamespace("api")
+	registerURL(ns)
 	beego.AddNamespace(ns)
+}
+
+func registerURL(ns *beego.Namespace) {
+	ns.Router("/object/getlist", &controllers.ObjectController{}, "get:GetAll")
+	ns.Router("/user/get", &controllers.UserController{}, "get:GetAll")
+	ns.Router("/admin/object/getlist", &admin.ObjectController{}, "get:GetAll")
+	ns.Router("/admin/user/get", &admin.UserController{}, "get:GetAll")
+
+	ns.Router("/test/type", &controllers.TestController{}, "*:TypeAssertion")
 }
