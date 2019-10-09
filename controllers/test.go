@@ -27,3 +27,18 @@ func (t *TestController) TypeAssertion()  {
 	t.Data["json"] = json
 	t.ServeJSON()
 }
+
+//IP转换
+func (t *TestController) IpChange(){
+	ip := t.GetString("ip")
+	rs := make(map[string]interface{})
+
+	rs["ip"] = ip
+
+	ipSave := util.IpStringToInt(ip)
+	rs["ipToInt"] = ipSave
+	rs["ipToString"] = util.IpIntToString(ipSave)
+
+	t.Data["json"] = rs
+	t.ServeJSON()
+}
