@@ -4,6 +4,7 @@ package models
 
 /**
  * 插入排序 {5, 2, 0, 1, 3, 1, 4}
+ * 从一组元素中取一个元素为有序元素组，然后在剩下的元素中每次取一个元素向有序的元素组插
  * 时间复杂度O(n^2)
  */
 func InsertSort(item []int) []int {
@@ -49,6 +50,7 @@ func ShellSort(item []int) []int {
 
 /**
  * 简单排序
+ * 循环查找“最小”元素放在首位
  * 时间复杂度O(n^2)
  */
 func SelectSort(item []int) []int {
@@ -68,6 +70,56 @@ func SelectSort(item []int) []int {
 		}
 		item[position] = item[i]
 		item[i] = temp
+	}
+
+	return item
+}
+
+/**
+ * @desc 创建最大堆
+ * @param slice item 元素组
+ * @param heapSize int 需要创建最大堆的大小
+ * @param index int 当前需要创建最大堆的位置
+ */
+func maxHeapify(item []int, heapSize, index int) {
+	left := index*2 + 1
+	right := left + 1
+
+	largest := index
+
+	if left < heapSize && item[index] < item[left] {
+		largest = left
+	}
+
+	if right < heapSize && item[largest] < item[right] {
+		largest = right
+	}
+
+	if largest != index {
+		temp := item[index]
+		item[index] = item[largest]
+		item[largest] = temp
+		maxHeapify(item, heapSize, largest)
+	}
+}
+
+/**
+ * @desc 堆排序
+ */
+func HeadSort(item []int) []int {
+	n := len(item)
+	startIndex := (n - 1 - 1) / 2
+
+	for i := startIndex; i >= 0; i-- {
+		maxHeapify(item, n, i)
+	}
+
+	var temp int
+	for i := n - 1; i > 0; i-- {
+		temp = item[0]
+		item[0] = item[i]
+		item[i] = temp
+		maxHeapify(item, i, 0)
 	}
 
 	return item
