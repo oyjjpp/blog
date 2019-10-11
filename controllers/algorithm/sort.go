@@ -34,7 +34,7 @@ func (o *SortController) ShellSort() {
 
 	data := make(map[string]interface{})
 	data["source"] = dataItem
-	rs := models.HeadSort(dataItem[:])
+	rs := models.QuikcSort(dataItem[:])
 	data["dest"] = rs
 
 	o.Data["json"] = data

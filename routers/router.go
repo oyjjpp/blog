@@ -81,8 +81,10 @@ func registerURL(ns *beego.Namespace) {
 	ns.Router("/admin/object/getlist", &admin.ObjectController{}, "get:GetAll")
 	ns.Router("/admin/user/get", &admin.UserController{}, "get:GetAll")
 
+	//测试
 	ns.Router("/test/type", &controllers.TestController{}, "*:TypeAssertion")
 	ns.Router("/test/ip", &controllers.TestController{}, "*:IpChange")
+	ns.Router("/test/typechange", &controllers.TestController{}, "*:TypeChange")
 
 	//排序算法
 	ns.Router("/algorithm/insertsort", &algorithm.SortController{}, "*:InsertSort")
