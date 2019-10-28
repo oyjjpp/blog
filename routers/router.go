@@ -89,4 +89,8 @@ func registerURL(ns *beego.Namespace) {
 	//排序算法
 	ns.Router("/algorithm/insertsort", &algorithm.SortController{}, "*:InsertSort")
 	ns.Router("/algorithm/shellsort", &algorithm.SortController{}, "*:ShellSort")
+
+	//加密算法
+	ns.Router("/algorithm/aes", &algorithm.EncryptionController{}, "*:AesEncry")
+	ns.Router("/algorithm/des", &algorithm.EncryptionController{}, "*:DesEncry")
 }
