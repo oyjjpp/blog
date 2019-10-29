@@ -2,13 +2,20 @@ package util
 
 import (
 	"bytes"
+	"crypto"
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/des"
 	"crypto/hmac"
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/sha1"
 	"crypto/sha256"
+	"crypto/x509"
 	"encoding/base64"
 	"encoding/hex"
+	"encoding/pem"
+	"errors"
 	"fmt"
 )
 
@@ -41,7 +48,7 @@ func DesEncrpty(data, key []byte) ([]byte, error) {
 		return nil, err
 	}
 	blockSize := block.BlockSize()
-	data = PKCS5Padding(data, blockSize)
+	data = PKCS7Padding(data, blockSize)
 	//根据block和初始向量生成加密算法，IV长度与block.size需要保持一致
 	blockMode := cipher.NewCBCEncrypter(block, key)
 
@@ -62,7 +69,7 @@ func DesDecrypt(crypted, key []byte) ([]byte, error) {
 	data := make([]byte, len(crypted))
 	blockMode.CryptBlocks(data, crypted)
 	//反扩充，获取原始明文
-	data = PKCS5UnPadding(data)
+	data = PKCS7UnPadding(data)
 	return data, nil
 }
 
@@ -110,32 +117,103 @@ func PKCS7Padding(ciphertext []byte, blockSize int) []byte {
 //通过PKCS7方式将明文数据的填充值去掉
 func PKCS7UnPadding(data []byte) []byte {
 	length := len(data)
-	unpadding := int(data[length-1])
-	return data[:(length - unpadding)]
-}
-
-//通过PKCS5方式填充明文数据
-func PKCS5Padding(ciphertext []byte, blockSize int) []byte {
-	padding := blockSize - len(ciphertext)%blockSize
-	println(blockSize, len(ciphertext), padding)
-	println("padding=" + string(padding) + "test")
-	padtext := bytes.Repeat([]byte{byte(padding)}, padding)
-	println(string(padtext))
-	return append(ciphertext, padtext...)
-}
-
-//通过PKCS5方式将明文数据的填充值去掉
-func PKCS5UnPadding(origData []byte) []byte {
-	length := len(origData)
 	if length == 0 {
 		return []byte{}
 	}
-	// 去掉最后一个字节 unpadding 次
-	unpadding := int(origData[length-1])
+	unpadding := int(data[length-1])
 	if unpadding < 0 {
-		return origData
+		return data
 	}
-	println("unpadding=" + string(unpadding))
+	return data[:(length - unpadding)]
+}
 
-	return origData[:(length - unpadding)]
+//RSA通过公钥加密
+//publicKey 公钥
+//data 要加密的数据
+func RsaPubEncrpty(publicKey, data []byte) ([]byte, error) {
+	//解密pem格式的公钥
+	block, _ := pem.Decode(publicKey)
+	if block == nil {
+		return nil, errors.New("pubkey key error!")
+	}
+
+	//解析公钥
+	pubInterface, err := x509.ParsePKIXPublicKey(block.Bytes)
+	if err != nil {
+		return nil, err
+	}
+	//类型断言
+	pub := pubInterface.(*rsa.PublicKey)
+
+	//加密
+	return rsa.EncryptPKCS1v15(rand.Reader, pub, data)
+}
+
+//私钥解密
+//privateKey 私钥
+//ciphertext 要解密的数据
+func RsaPriDecrypt(privateKey, ciphertext []byte) ([]byte, error) {
+	//获取私钥
+	block, _ := pem.Decode(privateKey)
+	if block == nil {
+		return nil, errors.New("private key error!")
+	}
+
+	//解析PKCS1格式私钥
+	priv, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+	if err != nil {
+		return nil, err
+	}
+
+	//解密
+	return rsa.DecryptPKCS1v15(rand.Reader, priv, ciphertext)
+}
+
+//RSA私钥签名
+func RsaPriEncrpty(privateKey, data []byte) ([]byte, error) {
+	/*
+		h := sha256.New()
+		h.Write(data)
+		hashed := h.Sum(nil)
+	*/
+	hashed := sha1.Sum(data)
+
+	//获取私钥
+	block, _ := pem.Decode(privateKey)
+	if block == nil {
+		return nil, errors.New("private key error!")
+	}
+
+	//解析PKCS1格式私钥
+	priv, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+	if err != nil {
+		return nil, err
+	}
+	//加密
+	return rsa.SignPKCS1v15(rand.Reader, priv, crypto.SHA1, hashed[:])
+	//return rsa.SignPKCS1v15(rand.Reader, priv, crypto.SHA256, hashed)
+}
+
+//RSA通过公钥验证签名
+func RsaVerifySign(data, pubkey []byte, sign string) error {
+	hashed := sha1.Sum(data)
+	sign2, err := base64.StdEncoding.DecodeString(sign)
+	if err != nil {
+		return err
+	}
+
+	block, _ := pem.Decode(pubkey)
+
+	if block == nil {
+		return errors.New("pubkey key error!")
+	}
+
+	pubInterface, err := x509.ParsePKIXPublicKey(block.Bytes)
+	if err != nil {
+		return err
+	}
+
+	pub := pubInterface.(*rsa.PublicKey)
+
+	return rsa.VerifyPKCS1v15(pub, crypto.SHA1, hashed[:], []byte(sign2))
 }

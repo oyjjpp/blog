@@ -93,4 +93,6 @@ func registerURL(ns *beego.Namespace) {
 	//加密算法
 	ns.Router("/algorithm/aes", &algorithm.EncryptionController{}, "*:AesEncry")
 	ns.Router("/algorithm/des", &algorithm.EncryptionController{}, "*:DesEncry")
+	ns.Router("/algorithm/rsa", &algorithm.EncryptionController{}, "*:RsaEncry")
+	ns.Router("/algorithm/rsasign", &algorithm.EncryptionController{}, "*:RsaSign")
 }
