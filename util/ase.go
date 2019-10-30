@@ -7,6 +7,7 @@ import (
 	"crypto/cipher"
 	"crypto/des"
 	"crypto/hmac"
+	"crypto/md5"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/sha1"
@@ -16,27 +17,7 @@ import (
 	"encoding/hex"
 	"encoding/pem"
 	"errors"
-	"fmt"
 )
-
-func hash_hmac() {
-	secret := "2QmS3P5UwxgVH8xKIMAxnvVvzJojmneWU1CxJNjztyXiJystqEhh2S2K2EmLBLO9lmm8fiKOuq85lyTros1CP0j2GMpFX9VuO5mDhURMmFdmnh9fBTA6HSJ5rs30Xkg3"
-	data := `/api/huawei/reader/getUserAsset{"timestamp":"20191025044022","data":{"userId":"70852000004110267","getAsset":1}}`
-	fmt.Printf("Secret: %s Data: %s\n", secret, data)
-
-	// Create a new HMAC by defining the hash type and the key (as byte array)
-	h := hmac.New(sha256.New, []byte(secret))
-
-	// Write Data to it
-	h.Write([]byte(data))
-
-	// Get result and encode as hexadecimal string
-	sha := hex.EncodeToString(h.Sum(nil))
-
-	fmt.Println("Result: " + sha)
-	encodeString := base64.StdEncoding.EncodeToString([]byte(sha))
-	fmt.Println(encodeString)
-}
 
 //DES 加密
 //data []byte 原始数据
@@ -216,4 +197,30 @@ func RsaVerifySign(data, pubkey []byte, sign string) error {
 	pub := pubInterface.(*rsa.PublicKey)
 
 	return rsa.VerifyPKCS1v15(pub, crypto.SHA1, hashed[:], []byte(sign2))
+}
+
+//MD5 hash 算法
+func md5Hash(data []byte) string {
+	md5Ctx := md5.New()
+	md5Ctx.Write(data)
+	ciphertext := md5Ctx.Sum(nil)
+	return hex.EncodeToString(ciphertext)
+}
+
+//SHA256 hash 算法
+func sha256Hash(data []byte) string {
+	sha256Ctx := sha256.New()
+	sha256Ctx.Write(data)
+	//元素数据二进制流
+	ciphertext := sha256Ctx.Sum(nil)
+	//转换成string
+	return hex.EncodeToString(ciphertext)
+}
+
+//MAC sha256 hash 算法
+func sha256MacHash(data, key []byte) string {
+	mac := hmac.New(sha256.New, key)
+	mac.Write(data)
+	ciphertext := mac.Sum(nil)
+	return hex.EncodeToString(ciphertext)
 }
