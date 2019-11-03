@@ -79,14 +79,15 @@ func (list *List) Insert(i uint64, node *Node) bool {
 }
 
 //删除指定位置元素
-func (list *List) Remove(i uint64, node *Node) bool {
+//注意尾部节点的问题
+func (list *List) Remove(i uint64) bool {
 	if i >= (*list).size {
 		return false
 	}
 
 	//删除头部
 	if i == 0 {
-		node = (*list).head
+		node := (*list).head
 		(*list).head = (*node).Next
 
 		//如果只有一个元素，尾部需要一起调整
@@ -101,7 +102,7 @@ func (list *List) Remove(i uint64, node *Node) bool {
 			tempNode = (*tempNode).Next
 		}
 
-		node = (*tempNode).Next
+		node := (*tempNode).Next
 		(*tempNode).Next = (*node).Next
 
 		//如果删除尾部元素
@@ -111,6 +112,21 @@ func (list *List) Remove(i uint64, node *Node) bool {
 	}
 
 	(*list).size--
+	return true
+}
+
+//删除链表的所有元素
+func (list *List) RemoveAll() bool {
+	if (*list).size == 0 {
+		return false
+	}
+
+	//防止内存泄漏，逐个循环删除元素
+	for (*list).head != nil {
+		(*list).head = (*list).head.Next
+	}
+	(*list).head = nil
+	(*list).tail = nil
 	return true
 }
 
@@ -127,6 +143,11 @@ func (list *List) Get(i uint64) *Node {
 		item = (*item).Next
 	}
 	return item
+}
+
+//获取链表长度
+func (list *List) GetSize() uint64 {
+	return (*list).size
 }
 
 //打印整个链表
