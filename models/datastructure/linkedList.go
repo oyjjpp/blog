@@ -1,169 +1,166 @@
 //数据结构——链表
 package datastructure
 
-import "fmt"
+import (
+	"fmt"
+	"oyjblog/util"
+)
 
-//单节点结构
 type Node struct {
-	data interface{}
+	Data interface{}
 	Next *Node
 }
 
-//链表结构
-type List struct {
-	size uint64 //链表数量
-	head *Node  //表头
-	tail *Node  //表尾
+type MyLinkedList struct {
+	Size int
+	Head *Node //表头
+	Tail *Node //表尾
 }
 
-//链表初始化操作
-func (list *List) Init() {
-	(*list).size = 0   //空链表
-	(*list).head = nil //设置表头为nil
-	(*list).tail = nil //设置表尾为nil
+/** Initialize your data structure here. */
+func Constructor() MyLinkedList {
+	var list MyLinkedList = MyLinkedList{Size: 0, Head: nil, Tail: nil}
+	return list
 }
 
-//顺序向链表尾部添加元素
-//如果原链表长度为0 则需要设置表头
-//如果原链表长度>0 则继续向表尾添加元素
-func (list *List) Append(node *Node) bool {
-	if node == nil {
+/** Get the value of the index-th node in the linked list. If the index is invalid, return -1. */
+func (this *MyLinkedList) Get(index int) int {
+	if index >= (*this).Size || index < 0 {
+		return -1
+	}
+
+	item := (*this).Head
+	for j := 0; j < index; j++ {
+		item = (*item).Next
+	}
+	rs, err := util.Int((*item).Data)
+	if err != nil {
+		return -1
+	}
+	return rs
+}
+
+/** Add a node of value val before the first element of the linked list. After the insertion, the new node will be the first node of the linked list. */
+func (this *MyLinkedList) AddAtHead(val int) {
+	node := Node{Data: val, Next: nil}
+
+	node.Next = (*this).Head
+	(*this).Head = &node
+	//当链表长度为0时
+	if (*this).Size == 0 {
+		(*this).Tail = &node
+	}
+	(*this).Size++
+}
+
+/** Append a node of value val to the last element of the linked list. */
+func (this *MyLinkedList) AddAtTail(val int) {
+	node := Node{Data: val, Next: nil}
+
+	tempNode := (*this).Tail
+	(*tempNode).Next = &node
+	//当链表长度为0时
+	if (*this).Size == 0 {
+		(*this).Head = &node
+	}
+	(*this).Tail = &node
+	(*this).Size++
+}
+
+/** Add a node of value val before the index-th node in the linked list. If index equals to the length of linked list, the node will be appended to the end of linked list. If index is greater than the length, the node will not be inserted. */
+func (this *MyLinkedList) AddAtIndex(index int, val int) bool {
+	//index大于链表长度 则不进行插入
+	if index > (*this).Size {
 		return false
 	}
 
-	//设置添加的节点下一节点为空
-	(*node).Next = nil
-
-	//将新元素放入单链表中
-	if (*list).size == 0 {
-		(*list).head = node
-	} else {
-		tmpNode := (*list).tail
-		(*tmpNode).Next = node
+	//如果小于0，则插入表头
+	if index < 0 {
+		index = 0
 	}
 
-	//调整尾部节点，及链表元素数量
-	(*list).tail = node
-	(*list).size++
-
-	return true
-}
-
-//任意位置插入元素
-//i==0 则调整链表 表头
-//i>0 则需要通过循环找到i元素的前一个元素
-func (list *List) Insert(i uint64, node *Node) bool {
-	//空的节点、索引超出范围、空链表都无法做插入操作
-	if node == nil || i > (*list).size || (*list).size == 0 {
-		return false
-	}
+	node := Node{Data: val, Next: nil}
 
 	//插入表头
-	if i == 0 {
-		(*node).Next = (*list).head
-		(*list).head = node
+	if index == 0 {
+		node.Next = (*this).Head
+		(*this).Head = &node
+		//当前链表长度为0
+		if (*this).Size == 0 {
+			(*this).Tail = &node
+		}
 	} else {
-		var j uint64
+		var j int
 		//找到i元素的前一个元素
-		tempNode := (*list).head
-		for j = 1; j < i; j++ {
+		tempNode := (*this).Head
+		for j = 1; j < index; j++ {
 			tempNode = (*tempNode).Next
 		}
-		//原来元素的后一个位置放到新元素后面
-		(*node).Next = (*tempNode).Next
+		//原来元素放到新元素后面
+		node.Next = (*tempNode).Next
 		//新元素放到前一个元素后面
-		(*tempNode).Next = node
+		(*tempNode).Next = &node
+
+		//index为链表长度
+		if index == (*this).Size {
+			(*this).Tail = &node
+		}
 	}
-	(*list).size++
+	(*this).Size++
 	return true
 }
 
-//删除指定位置元素
-//注意尾部节点的问题
-func (list *List) Remove(i uint64) bool {
-	if i >= (*list).size {
+/** Delete the index-th node in the linked list, if the index is valid. */
+func (this *MyLinkedList) DeleteAtIndex(index int) bool {
+	if index >= (*this).Size || index < 0 {
 		return false
 	}
 
 	//删除头部
-	if i == 0 {
-		node := (*list).head
-		(*list).head = (*node).Next
+	if index == 0 {
+		node := (*this).Head
+		(*this).Head = (*node).Next
 
 		//如果只有一个元素，尾部需要一起调整
-		if (*list).size == 1 {
-			(*list).tail = nil
+		if (*this).Size == 1 {
+			(*this).Tail = nil
 		}
 	} else {
 		//查找i节点前一个节点
-		var j uint64
-		tempNode := (*list).head
-		for j = 1; j < i; j++ {
+		var j int
+		tempNode := (*this).Head
+		for j = 1; j < index; j++ {
 			tempNode = (*tempNode).Next
 		}
 
+		//node := tempNode
 		node := (*tempNode).Next
 		(*tempNode).Next = (*node).Next
 
 		//如果删除尾部元素
-		if i == ((*list).size - 1) {
-			(*list).tail = tempNode
+		if index == ((*this).Size - 1) {
+			(*this).Tail = tempNode
 		}
 	}
 
-	(*list).size--
+	(*this).Size--
 	return true
-}
-
-//删除链表的所有元素
-func (list *List) RemoveAll() bool {
-	if (*list).size == 0 {
-		return false
-	}
-
-	//防止内存泄漏，逐个循环删除元素
-	for (*list).head != nil {
-		(*list).head = (*list).head.Next
-	}
-	(*list).head = nil
-	(*list).tail = nil
-	return true
-}
-
-//获取某个位置的元素
-func (list *List) Get(i uint64) *Node {
-	//超过链表大小
-	if i >= (*list).size {
-		return nil
-	}
-
-	var j uint64
-	item := (*list).head
-	for j = 0; j < i; j++ {
-		item = (*item).Next
-	}
-	return item
-}
-
-//获取链表长度
-func (list *List) GetSize() uint64 {
-	return (*list).size
 }
 
 //打印整个链表
-func (list *List) Print() {
-	listLen := (*list).size
+func (list *MyLinkedList) Print() {
+	listLen := (*list).Size
 	if listLen == 0 {
 		fmt.Printf("当前链表为空!\n")
 	}
 
 	fmt.Printf("链表长度=%d\n", listLen)
 
-	item := (*list).head
+	item := (*list).Head
 
-	var j uint64
+	var j int
 	for j = 0; j < listLen; j++ {
-		fmt.Println(item.data)
+		fmt.Println(item.Data)
 		item = (*item).Next
 	}
 }
