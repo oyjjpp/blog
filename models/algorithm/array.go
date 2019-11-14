@@ -1,6 +1,23 @@
 //数组常见相关算法
 package algorithm
 
+
+//反转数组中的元素
+//双指针技巧使用场景
+func ReverseArray(mem []int) []int {
+	if len(mem) < 2 {
+		return mem
+	}
+	i := 0
+	n := len(mem) - 1
+	for i < n {
+		mem[i], mem[n] = mem[n], mem[i]
+		i++
+		n--
+	}
+	return mem
+}
+
 //杨辉三角
 //1、col=0  元素为1
 //2、col=row 元素为1 并不在为当前行余下元素赋值

@@ -85,6 +85,7 @@ func registerURL(ns *beego.Namespace) {
 	ns.Router("/test/type", &controllers.TestController{}, "*:TypeAssertion")
 	ns.Router("/test/ip", &controllers.TestController{}, "*:IpChange")
 	ns.Router("/test/typechange", &controllers.TestController{}, "*:TypeChange")
+	ns.Router("/test/redis", &controllers.TestController{}, "*:Redis")
 
 	//排序算法
 	ns.Router("/algorithm/insertsort", &algorithm.SortController{}, "*:InsertSort")

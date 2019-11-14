@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"fmt"
+	"oyjblog/service"
 	"oyjblog/util"
 
 	"github.com/astaxie/beego"
@@ -50,4 +52,19 @@ func (t *TestController) TypeChange() {
 	rs["number"] = number
 	t.Data["json"] = rs
 	t.ServeJSON()
+}
+
+func (t *TestController) Redis() {
+	rp := service.RedisPool{}
+	redis_info_array := []string{"192.168.6.20:19000"}
+	rp.InitRedisPool(redis_info_array)
+	err := rp.RedisSet("learn", "golang-redis-pool")
+	if err != nil {
+		fmt.Printf("%s\n", err)
+	}
+	rs, err := rp.RedisGet("learn")
+	if err != nil {
+		fmt.Printf("%s\n", err)
+	}
+	fmt.Println(rs)
 }

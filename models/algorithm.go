@@ -1,8 +1,6 @@
 //算法
 package models
 
-import "fmt"
-
 //@link 排序算法 https://juejin.im/post/5a08cc646fb9a045030f9174
 
 /**
@@ -159,6 +157,7 @@ func BubbleSort(item []int) []int {
 /**
  * @desc 快速排序
  * 时间复杂度O(nlogn)
+ * 算法：选择一个基数，一般我们选择第一个数，然后把大于该数的放右边，小于该数的放左边，然后分别对左右两边用同样的方法处理，直到排序结束。
  */
 func QuikcSort(item []int) []int {
 	quickSort(item, 0, len(item)-1)
@@ -172,14 +171,19 @@ func swap(item []int, i, j int) {
 	item[j] = temp
 }
 
-//快速排序
+//@desc 快速排序
+//@param item 待排序的数组
+//@param start 开始位置
+//@param end 结束位置
 func quickSort(item []int, start, end int) {
 	if start < end {
+		//第一个元素作为基数
 		pivot := item[start]
 		left := start
 		right := end
 
 		for left != right {
+			//最右边的元素大于基数
 			for item[right] >= pivot && left < right {
 				right--
 			}
@@ -187,9 +191,7 @@ func quickSort(item []int, start, end int) {
 			for item[left] <= pivot && left < right {
 				left++
 			}
-			println(left, right)
 			swap(item, left, right)
-			fmt.Printf("%v\n", item)
 		}
 
 		item[start] = item[left]

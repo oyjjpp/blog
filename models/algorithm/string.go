@@ -7,6 +7,44 @@ import (
 	"unicode/utf8"
 )
 
+//最长公共前缀
+func LongestCommonPrefix(strs []string) string {
+	strLen := len(strs)
+	//空的字符串数组
+	if strLen == 0 {
+		return ""
+	}
+	//含有一个元素的字符串数组
+	if strLen == 1 {
+		return string(strs[0])
+	}
+	//假设前缀为第一个元素
+	pre := string(strs[0])
+	for i := 1; i < strLen; i++ {
+		cur := strs[i]
+
+		n := len(pre)
+		if len(pre) >= len(cur) {
+			n = len(cur)
+			pre = string(pre[:len(cur)])
+		}
+
+		//循环对比两个字符串
+		for j := 0; j < n; j++ {
+			if pre[j] == cur[j] {
+				continue
+			}
+			//第一个字符就不相等 则直接返回
+			if j == 0 {
+				return ""
+			}
+			pre = string(pre[0:j])
+			break
+		}
+	}
+	return pre
+}
+
 //字符串查找
 func StrStr(haystack string, needle string) int {
 	if needle == "" {
