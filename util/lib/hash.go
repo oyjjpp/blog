@@ -10,8 +10,9 @@ import (
 	"sync"
 )
 
-//为是节点均匀分发，使用重复方式，将节点分布hash环上的多个位置
-const DEFAULT_REPLICAS = 160
+//为解决数据倾斜问题（数据分布不均匀），引入虚拟节点机制
+//对每一个节点计算多个哈希
+const VIRTUAL_NODE = 32
 
 //哈希环
 type HashRing []uint32
@@ -68,7 +69,7 @@ type Consistent struct {
 func NewConsistent() *Consistent {
 	return &Consistent{
 		Nodes:     make(map[uint32]Node),
-		numReps:   DEFAULT_REPLICAS,
+		numReps:   VIRTUAL_NODE,
 		Resources: make(map[int]bool),
 		ring:      HashRing{},
 	}
