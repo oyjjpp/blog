@@ -56,7 +56,7 @@ func (t *TestController) TypeChange() {
 
 func (t *TestController) Redis() {
 	rp := service.RedisPool{}
-	redis_info_array := []string{"192.168.6.20:19000"}
+	redis_info_array := []string{"127.0.0.1:19000", "127.0.0.1:6399"}
 	rp.InitRedisPool(redis_info_array)
 	err := rp.RedisSet("learn", "golang-redis-pool")
 	if err != nil {
