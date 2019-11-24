@@ -1,7 +1,84 @@
 //数组常见相关算法
 package algorithm
 
+import (
+	"oyjblog/models"
+)
 
+//长度最小的子数组
+func MinSubArrayLen(s int, nums []int) int {
+	k:=0
+	for i:=0;i<nums;i++{
+
+	}
+	return k
+}
+
+
+//最大连续1的个数
+func FindMaxConsecutiveOnes(nums []int) int {
+	var rs ,temp int
+	for i:= 0; i< len(nums);i++{
+		if nums[i] == 1 {
+			temp++
+		}else{
+			if (temp > rs){
+				rs = temp
+			}
+			temp = 0
+		}
+	}
+	//考虑最后一个也为1的情况
+	if temp >= rs {
+		rs = temp
+	}
+	return rs
+}
+
+
+//移除元素
+//给定一个数组和一个值，原地删除该值的所有实例并返回新的长度
+//解题思路：使用两个指针，一个用于迭代，一个指针总是指向下一次添加的位置
+func RemoveElement(nums []int, val int) int {
+	k := 0
+	for i := 0; i < len(nums); i++ {
+		if nums[i] != val {
+			nums[k] = nums[i]
+			k++
+		}
+	}
+	return k
+}
+
+//两数之和
+//给定一个已按照升序排列 的有序数组，找到两个数使得它们相加之和等于目标数。
+//函数应该返回这两个下标值 index1 和 index2，其中 index1 必须小于 index2。
+//解题思路：循环相加 碰到相等的则返回
+func TwoSum(numbers []int, target int) []int {
+	rs := make([]int, 2)
+	for i := 0; i < len(numbers); i++ {
+		for j := i + 1; j < len(numbers); j++ {
+			temp := numbers[i] + numbers[j]
+			if temp == target {
+				rs[0] = i + 1
+				rs[1] = j + 1
+			}
+		}
+	}
+	return rs
+}
+
+//数组拆分
+//给定长度为 2n 的数组, 你的任务是将这些数分成 n 对, 例如 (a1, b1), (a2, b2), ..., (an, bn) ，使得从1 到 n 的 min(ai, bi) 总和最大。
+//解题思路：数组排序，连续两个为一组，即可计算出最大的和
+func ArrayPairSum(nums []int) int {
+    mem := models.QuikcSort(nums)
+	rs := 0
+	for i := 0; i < len(mem); i = i + 2 {
+		rs = rs + mem[i]
+	}
+	return rs
+}  
 //反转数组中的元素
 //双指针技巧使用场景
 func ReverseArray(mem []int) []int {

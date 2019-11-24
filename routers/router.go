@@ -10,6 +10,7 @@ import (
 	"oyjblog/controllers"
 	"oyjblog/controllers/admin"
 	"oyjblog/controllers/algorithm"
+	"oyjblog/controllers/network"
 
 	"github.com/astaxie/beego"
 	//"github.com/astaxie/beego/context"
@@ -96,4 +97,10 @@ func registerURL(ns *beego.Namespace) {
 	ns.Router("/algorithm/des", &algorithm.EncryptionController{}, "*:DesEncry")
 	ns.Router("/algorithm/rsa", &algorithm.EncryptionController{}, "*:RsaEncry")
 	ns.Router("/algorithm/rsasign", &algorithm.EncryptionController{}, "*:RsaSign")
+
+	//网络编程
+	ns.Router("/network/get", &network.HttpController{}, "*:Get")
+
+	//输入输出
+
 }
