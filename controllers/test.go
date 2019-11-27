@@ -2,8 +2,8 @@ package controllers
 
 import (
 	"fmt"
-	"oyjblog/service"
-	"oyjblog/util"
+	"blog/service"
+	"blog/util"
 
 	"github.com/astaxie/beego"
 )

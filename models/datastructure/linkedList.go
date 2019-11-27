@@ -3,7 +3,7 @@ package datastructure
 
 import (
 	"fmt"
-	"oyjblog/util"
+	"blog/util"
 )
 
 type Node struct {

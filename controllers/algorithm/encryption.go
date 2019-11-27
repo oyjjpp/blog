@@ -2,8 +2,8 @@ package algorithm
 
 import (
 	"encoding/base64"
-	"oyjblog/define"
-	"oyjblog/util"
+	"blog/define"
+	"blog/util"
 
 	"github.com/astaxie/beego"
 )

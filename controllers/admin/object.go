@@ -1,7 +1,7 @@
 package admin
 
 import (
-	"oyjblog/models"
+	"blog/models"
 	"encoding/json"
     "fmt"
 	"github.com/astaxie/beego"

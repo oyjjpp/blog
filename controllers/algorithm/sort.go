@@ -2,7 +2,7 @@ package algorithm
 
 import (
 	"fmt"
-	"oyjblog/models"
+	"blog/models"
 
 	"github.com/astaxie/beego"
 )

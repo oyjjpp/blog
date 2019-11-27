@@ -7,10 +7,10 @@
 package routers
 
 import (
-	"oyjblog/controllers"
-	"oyjblog/controllers/admin"
-	"oyjblog/controllers/algorithm"
-	"oyjblog/controllers/network"
+	"blog/controllers"
+	"blog/controllers/admin"
+	"blog/controllers/algorithm"
+	"blog/controllers/network"
 
 	"github.com/astaxie/beego"
 	//"github.com/astaxie/beego/context"

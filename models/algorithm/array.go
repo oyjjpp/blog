@@ -2,7 +2,7 @@
 package algorithm
 
 import (
-	"oyjblog/models"
+	"blog/models"
 )
 
 //长度最小的子数组
