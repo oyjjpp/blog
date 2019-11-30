@@ -100,6 +100,7 @@ func registerURL(ns *beego.Namespace) {
 
 	//网络编程
 	ns.Router("/network/get", &network.HttpController{}, "*:Get")
+	ns.Router("/network/getcontent", &network.HttpController{}, "*:GetContent")
 
 	//输入输出
 
