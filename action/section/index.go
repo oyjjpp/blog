@@ -12,5 +12,5 @@ func Index(ctx *gin.Context) {
 		"msg":  "success",
 		"body", "section_index",
 	}
-	ctx.Json(http.StatusOK, res)
+	ctx.JSON(http.StatusOK, res)
 }
