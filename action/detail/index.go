@@ -10,7 +10,7 @@ func Index(ctx *gin.Context) {
 	res := map[string]interface{}{
 		"code": 0,
 		"msg":  "success",
-		"body", "detai_index",
+		"body": "detai_index",
 	}
 	ctx.JSON(http.StatusOK, res)
 }
