@@ -7,6 +7,7 @@ import (
 )
 
 func Index(ctx *gin.Context) {
+	strings.Buffer
 	res := map[string]interface{}{
 		"code": 0,
 		"msg":  "success",
@@ -14,3 +15,5 @@ func Index(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, res)
 }
+
+// concurrent

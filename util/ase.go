@@ -2,21 +2,9 @@ package util
 
 import (
 	"bytes"
-	"crypto"
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/des"
-	"crypto/hmac"
-	"crypto/md5"
-	"crypto/rand"
-	"crypto/rsa"
-	"crypto/sha1"
-	"crypto/sha256"
-	"crypto/x509"
-	"encoding/base64"
-	"encoding/hex"
-	"encoding/pem"
-	"errors"
 )
 
 //DES 加密
@@ -108,119 +96,59 @@ func PKCS7UnPadding(data []byte) []byte {
 	return data[:(length - unpadding)]
 }
 
-//RSA通过公钥加密
-//publicKey 公钥
-//data 要加密的数据
-func RsaPubEncrpty(publicKey, data []byte) ([]byte, error) {
-	//解密pem格式的公钥
-	block, _ := pem.Decode(publicKey)
-	if block == nil {
-		return nil, errors.New("pubkey key error!")
-	}
-
-	//解析公钥
-	pubInterface, err := x509.ParsePKIXPublicKey(block.Bytes)
-	if err != nil {
-		return nil, err
-	}
-	//类型断言
-	pub := pubInterface.(*rsa.PublicKey)
-
-	//加密
-	return rsa.EncryptPKCS1v15(rand.Reader, pub, data)
+func PKCS5Padding(ciphertext []byte, blockSize int) []byte {
+	padding := blockSize - len(ciphertext)%blockSize //需要padding的数目
+	//只要少于256就能放到一个byte中，默认的blockSize=16(即采用16*8=128, AES-128长的密钥)
+	//最少填充1个byte，如果原文刚好是blocksize的整数倍，则再填充一个blocksize
+	padtext := bytes.Repeat([]byte{byte(padding)}, padding) //生成填充的文本
+	return append(ciphertext, padtext...)
 }
 
-//私钥解密
-//privateKey 私钥
-//ciphertext 要解密的数据
-func RsaPriDecrypt(privateKey, ciphertext []byte) ([]byte, error) {
-	//获取私钥
-	block, _ := pem.Decode(privateKey)
-	if block == nil {
-		return nil, errors.New("private key error!")
-	}
-
-	//解析PKCS1格式私钥
-	priv, err := x509.ParsePKCS1PrivateKey(block.Bytes)
-	if err != nil {
-		return nil, err
-	}
-
-	//解密
-	return rsa.DecryptPKCS1v15(rand.Reader, priv, ciphertext)
+func PKCS5UnPadding(origData []byte) []byte {
+	length := len(origData)
+	unpadding := int(origData[length-1])
+	return origData[:(length - unpadding)]
 }
 
-//RSA私钥签名
-func RsaPriEncrpty(privateKey, data []byte) ([]byte, error) {
-	/*
-		h := sha256.New()
-		h.Write(data)
-		hashed := h.Sum(nil)
-	*/
-	hashed := sha1.Sum(data)
-
-	//获取私钥
-	block, _ := pem.Decode(privateKey)
-	if block == nil {
-		return nil, errors.New("private key error!")
-	}
-
-	//解析PKCS1格式私钥
-	priv, err := x509.ParsePKCS1PrivateKey(block.Bytes)
-	if err != nil {
-		return nil, err
-	}
-	//加密
-	return rsa.SignPKCS1v15(rand.Reader, priv, crypto.SHA1, hashed[:])
-	//return rsa.SignPKCS1v15(rand.Reader, priv, crypto.SHA256, hashed)
+func PKCS5Trimming(encrypt []byte) []byte {
+	padding := encrypt[len(encrypt)-1]
+	return encrypt[:len(encrypt)-int(padding)]
 }
 
-//RSA通过公钥验证签名
-func RsaVerifySign(data, pubkey []byte, sign string) error {
-	hashed := sha1.Sum(data)
-	sign2, err := base64.StdEncoding.DecodeString(sign)
-	if err != nil {
-		return err
-	}
-
-	block, _ := pem.Decode(pubkey)
-
-	if block == nil {
-		return errors.New("pubkey key error!")
-	}
-
-	pubInterface, err := x509.ParsePKIXPublicKey(block.Bytes)
-	if err != nil {
-		return err
-	}
-
-	pub := pubInterface.(*rsa.PublicKey)
-
-	return rsa.VerifyPKCS1v15(pub, crypto.SHA1, hashed[:], []byte(sign2))
+func ZeroPadding(ciphertext []byte, blockSize int) []byte {
+	padding := blockSize - len(ciphertext)%blockSize
+	padtext := bytes.Repeat([]byte{0}, padding) //用0去填充
+	return append(ciphertext, padtext...)
 }
 
-//MD5 hash 算法
-func md5Hash(data []byte) string {
-	md5Ctx := md5.New()
-	md5Ctx.Write(data)
-	ciphertext := md5Ctx.Sum(nil)
-	return hex.EncodeToString(ciphertext)
+func ZeroUnPadding(origData []byte) []byte {
+	return bytes.TrimFunc(origData,
+		func(r rune) bool {
+			return r == rune(0)
+		})
 }
 
-//SHA256 hash 算法
-func sha256Hash(data []byte) string {
-	sha256Ctx := sha256.New()
-	sha256Ctx.Write(data)
-	//元素数据二进制流
-	ciphertext := sha256Ctx.Sum(nil)
-	//转换成string
-	return hex.EncodeToString(ciphertext)
+func EcbDecrypt(data, key []byte) []byte {
+	block, _ := aes.NewCipher(key)
+	decrypted := make([]byte, len(data))
+	size := block.BlockSize()
+
+	for bs, be := 0, size; bs < len(data); bs, be = bs+size, be+size {
+		block.Decrypt(decrypted[bs:be], data[bs:be])
+	}
+
+	return PKCS7UnPadding(decrypted)
 }
 
-//MAC sha256 hash 算法
-func sha256MacHash(data, key []byte) string {
-	mac := hmac.New(sha256.New, key)
-	mac.Write(data)
-	ciphertext := mac.Sum(nil)
-	return hex.EncodeToString(ciphertext)
+func EcbEncrypt(data, key []byte) []byte {
+	block, _ := aes.NewCipher(key)
+	data = PKCS7Padding(data, block.BlockSize())
+	decrypted := make([]byte, len(data))
+	size := block.BlockSize()
+
+	for bs, be := 0, size; bs < len(data); bs, be = bs+size, be+size {
+		block.Encrypt(decrypted[bs:be], data[bs:be])
+	}
+
+	return decrypted
 }
