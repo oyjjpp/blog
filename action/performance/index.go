@@ -7,9 +7,13 @@
 package performance
 
 import (
+	"bytes"
+	"fmt"
 	"log"
 	"os"
 	"runtime/pprof"
+	"strconv"
+	"strings"
 )
 
 func FilePerformance() {
@@ -45,4 +49,47 @@ func FilePerformance() {
 		gPprof.WriteTo(fileGoroutine, 0)
 	}
 	defer fileGoroutine.Close()
+}
+
+func Fib(n int) int {
+	switch n {
+	case 0:
+		return 0
+	case 1:
+		return 1
+	case 2:
+		return 2
+	default:
+		return Fib(n-1) + Fib(n-2)
+	}
+}
+
+func stringAdd() (str string) {
+	for i := 0; i < 20000; i++ {
+		str += strconv.Itoa(i)
+	}
+	return
+}
+
+func stringAddV2() (str string) {
+	for i := 0; i < 20000; i++ {
+		str = fmt.Sprintf("%s%d", str, i)
+	}
+	return
+}
+
+func stringAddBuffer() string {
+	var str bytes.Buffer
+	for i := 0; i < 20000; i++ {
+		str.WriteString(strconv.Itoa(i))
+	}
+	return str.String()
+}
+
+func stringAddBuilder() string {
+	var str strings.Builder
+	for i := 0; i < 20000; i++ {
+		str.WriteString(strconv.Itoa(i))
+	}
+	return str.String()
 }
