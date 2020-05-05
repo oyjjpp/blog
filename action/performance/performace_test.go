@@ -18,6 +18,12 @@ func BenchmarkStrAddBuilder(b *testing.B) {
 	b.StopTimer()
 }
 
+func BenchmarkFib(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		Fib(20)
+	}
+}
+
 /*
 
 基准测试手段
@@ -25,16 +31,21 @@ func BenchmarkStrAddBuilder(b *testing.B) {
 // 运行基准测试
 go test -bench=.
 
-
 // 排除其他测试
 go test -bench=. -run=none
-go test -run=^&
+go test -bench=. -run=^&
+
+// 运行指定测试[通过-bench参数正则匹配]
+go test -bench=Fid
 
 // 指定CPU核数
 go test -bench=. -run=none -cpu=1,2,4
 
 // 指定时间 以达到足够的采集信息
 go test -bench=. -run=none  -benchtime=10s
+
+基准测试原理：
+
 
 
 常见导致性能的问题
@@ -74,5 +85,27 @@ top 用法
 list
 // 进一步查看目标,将一个函数里面每个执行命令拆开来分析
 peek
+
+go tool pprof 使用
+https://wiki.jikexueyuan.com/project/go-command-tutorial/0.12.html
+
+pprof
+https://juejin.im/post/5dca56ff518825575a358e9e
+
+
+在尝试提高一段代码的性能之前，首先我们必须了解当前性能
+
+性能分析工具
+1、pprof[gperftools工具的一个逐渐，由google开发]
+
+2、go-torch[uber开发的工具]
+支持火焰图
+go get github.com/uber/go-torch
+
+3、gom[由google开发]
+可以显示运行的goroutine和机器线程数
+实时更新
+可视化
+http://github.com/rakyll/gom
 
 */
