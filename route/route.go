@@ -16,5 +16,6 @@ func LoadRoute(engine *gin.Engine) {
 		// performance
 		demoRouter.GET("/performance/cpu_data", performance.CPUData)
 		demoRouter.GET("/performance/cpu_test", performance.CPUtest)
+		demoRouter.GET("/performance/gc_data", performance.GcData)
 	}
 }
