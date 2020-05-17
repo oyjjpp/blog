@@ -9,13 +9,9 @@ package performance
 import (
 	"bytes"
 	"fmt"
-	"log"
-	"os"
-	"runtime/pprof"
 	"strconv"
 	"strings"
 )
-
 
 func stringAdd() (str string) {
 	for i := 0; i < 20000; i++ {
