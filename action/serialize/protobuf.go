@@ -14,6 +14,8 @@ func Protobuf(ctx *gin.Context) {
 	ctx.ProtoBuf(http.StatusOK, productData())
 }
 
+// productData
+// 生产数据
 func productData() *userinfo.ContactBook {
 	per1 := &userinfo.Person{
 		Id:   1,
