@@ -5,10 +5,12 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/sha1"
+	"crypto/sha256"
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/pem"
 	"errors"
+	"fmt"
 )
 
 // RsaPubEncrpty
@@ -101,4 +103,60 @@ func RsaVerifySign(data, pubkey []byte, sign string) error {
 	pub := pubInterface.(*rsa.PublicKey)
 
 	return rsa.VerifyPKCS1v15(pub, crypto.SHA1, hashed[:], []byte(sign2))
+}
+
+// SHA256withRSAPSS
+// 数据签名：SHA256withRSA/PSS
+func SHA256withRSAPSS(data, privateKey string) string {
+	msgHash := sha256.New()
+	msgHash.Write([]byte(data))
+	msgHashSum := msgHash.Sum(nil)
+
+	// 处理私钥
+	block, _ := pem.Decode([]byte(privateKey))
+	if block == nil {
+		return ""
+	}
+	priInterface, err := x509.ParsePKCS8PrivateKey(block.Bytes)
+	if err != nil {
+		return ""
+	}
+	private := priInterface.(*rsa.PrivateKey)
+	opts := rsa.PSSOptions{SaltLength: 0}
+	if signature, err := rsa.SignPSS(rand.Reader, private, crypto.SHA256, msgHashSum, &opts); err == nil {
+		return base64.StdEncoding.EncodeToString(signature)
+	} else {
+		return ""
+	}
+}
+
+// RsaVerifySHA256withRSAPSS
+// 签名验证
+func RsaVerifySHA256withRSAPSS(data, sign, pubkey string) error {
+	clientSign, err := base64.StdEncoding.DecodeString(sign)
+	if err != nil {
+		return err
+	}
+
+	// 处理公钥
+	block, _ := pem.Decode([]byte(pubkey))
+	if block == nil {
+		return errors.New("pubkey key error!")
+	}
+
+	pubInterface, err := x509.ParsePKIXPublicKey(block.Bytes)
+	if err != nil {
+		return err
+	}
+	pub := pubInterface.(*rsa.PublicKey)
+
+	// 获取可以利用的加密hash算法
+	hashed := sha256.Sum256([]byte(data))
+
+	// 取模校验
+	nBits := pub.N.BitLen()
+	fmt.Println("ErrVerification", nBits, len(clientSign), (nBits+7)/8)
+
+	//opts := rsa.PSSOptions{SaltLength: 0}
+	return rsa.VerifyPSS(pub, crypto.SHA256, hashed[:], clientSign, nil)
 }
