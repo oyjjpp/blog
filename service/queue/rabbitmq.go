@@ -3,6 +3,12 @@
 // AMQP(高级消息队列协议)是一个进程间传递异步消息的网络协议
 // 使用Erlang语言实现
 // 架构的主要角色:生产者、消费者、交换器、队列
+
+/*
+交换器：消息代理待服务中勇于把消息路由到队列的组件
+队列：用来存储消息的数据结构，位于硬盘或内存中
+绑定：一套规则，勇于告诉交换器消息应该被存储到哪个队列
+*/
 package queue
 
 import (
@@ -194,3 +200,8 @@ func (r *Rabbitmq) consume(channel *amqp.Channel) {
 func (r *Rabbitmq) consumeGet(channel *amqp.Channel) {
 	channel.Get("q1", false)
 }
+
+/*
+解耦应用
+
+*/

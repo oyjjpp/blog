@@ -10,6 +10,7 @@ import (
 )
 
 func Rabbitmap(ctx *gin.Context) {
+	sample()
 }
 
 func connection() *amqp.Connection {
