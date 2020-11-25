@@ -12,8 +12,8 @@ func LoadRoute(engine *gin.Engine) {
 	// route
 	demoRouter := engine.Group("/blog")
 	{
-		demoRouter.POST("/detail/list", detail.List)
-		demoRouter.POST("/detail/index", detail.Index)
+		demoRouter.GET("/detail/list", detail.List)
+		demoRouter.GET("/detail/index", detail.Index)
 		demoRouter.GET("/section/index", section.Index)
 
 		// performance
