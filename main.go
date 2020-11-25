@@ -17,7 +17,7 @@ import (
 )
 
 func main() {
-	endlessCreate()
+	ginCreate()
 }
 
 // ginCreate
