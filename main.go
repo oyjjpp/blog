@@ -13,10 +13,13 @@ import (
 	"github.com/fvbock/endless"
 	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
+	"github.com/oyjjpp/blog/initialize"
 	"github.com/oyjjpp/blog/route"
 )
 
 func main() {
+	initialize.Mysql()
+	initialize.DBTables()
 	ginCreate()
 }
 
