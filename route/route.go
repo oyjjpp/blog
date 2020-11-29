@@ -28,5 +28,8 @@ func LoadRoute(engine *gin.Engine) {
 		// mysql
 		demoRouter.GET("/user/read", user.Read)
 		demoRouter.GET("/user/table", user.Table)
+		demoRouter.GET("/user/searchbykey", user.SearchByKey)
+		demoRouter.GET("/user/searchsbykey", user.SearchSByKey)
+		demoRouter.GET("/user/searchwhere", user.SearchWhere)
 	}
 }

@@ -11,10 +11,10 @@ import (
 	"time"
 
 	"github.com/fvbock/endless"
-	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 	"github.com/oyjjpp/blog/global"
 	"github.com/oyjjpp/blog/initialize"
+	"github.com/oyjjpp/blog/middleware"
 	"github.com/oyjjpp/blog/route"
 )
 
@@ -22,8 +22,14 @@ func main() {
 	// 初始化数据库
 	initialize.Mysql()
 	initialize.DBTables()
+
 	// 程序结束前关闭数据库链接
-	defer global.MysqlDB.Close()
+	defer func() {
+		if sqlDB, err := global.MysqlDB.DB(); err == nil {
+			log.Println("程序结束前关闭数据库链接")
+			sqlDB.Close()
+		}
+	}()
 
 	// 注册TCP服务
 	ginCreate()
@@ -32,12 +38,20 @@ func main() {
 // ginCreate
 func ginCreate() {
 	handler := gin.New()
+
+	// 设置运行模式
+	gin.SetMode(gin.DebugMode)
+	gin.ForceConsoleColor()
+
+	// 注册中间件
+	handler.Use(middleware.Logger())
+	// handler.Use(gin.Recovery())
+
 	// 注册路由
 	route.LoadRoute(handler)
 	// 注册性能分析
-	pprof.Register(handler)
-	// 注册中间件
-	handler.Use(gin.Logger())
+	// pprof.Register(handler)
+
 	// 监听端口
 	handler.Run(":8091") // 监听并在 0.0.0.0:8080 上启动服务
 }
