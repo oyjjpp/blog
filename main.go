@@ -13,13 +13,19 @@ import (
 	"github.com/fvbock/endless"
 	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
+	"github.com/oyjjpp/blog/global"
 	"github.com/oyjjpp/blog/initialize"
 	"github.com/oyjjpp/blog/route"
 )
 
 func main() {
+	// 初始化数据库
 	initialize.Mysql()
 	initialize.DBTables()
+	// 程序结束前关闭数据库链接
+	defer global.MysqlDB.Close()
+
+	// 注册TCP服务
 	ginCreate()
 }
 

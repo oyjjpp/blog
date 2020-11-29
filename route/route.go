@@ -6,6 +6,7 @@ import (
 	"github.com/oyjjpp/blog/action/performance"
 	"github.com/oyjjpp/blog/action/section"
 	"github.com/oyjjpp/blog/action/serialize"
+	"github.com/oyjjpp/blog/action/user"
 )
 
 func LoadRoute(engine *gin.Engine) {
@@ -23,5 +24,9 @@ func LoadRoute(engine *gin.Engine) {
 
 		// serialize
 		demoRouter.GET("/serialize/protobuf", serialize.Protobuf)
+
+		// mysql
+		demoRouter.GET("/user/read", user.Read)
+		demoRouter.GET("/user/table", user.Table)
 	}
 }

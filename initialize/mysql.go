@@ -2,6 +2,7 @@ package initialize
 
 import (
 	"os"
+	"time"
 
 	"github.com/oyjjpp/blog/global"
 	"gorm.io/driver/mysql"
@@ -9,12 +10,24 @@ import (
 )
 
 // Mysql
+// 连接数据库
 func Mysql() {
+	// https://github.com/go-sql-driver/mysql#dsn-data-source-name
 	dsn := "web:web1234!@#$@tcp(47.98.161.8:8004)/qmPlus?charset=utf8&parseTime=True&loc=Local"
 	if db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{}); err != nil {
 		// panic("failed to connect database")
 		os.Exit(0)
 	} else {
-		global.DB = db
+		global.MysqlDB = db
+
+		// 设置连接池
+		if sqlDB, err := global.MysqlDB.DB(); err == nil {
+			// SetMaxIdleConns 设置空闲连接池中连接的最大数量
+			sqlDB.SetMaxIdleConns(2)
+			// SetMaxOpenConns 设置打开数据库连接的最大数量。
+			sqlDB.SetMaxOpenConns(10)
+			// SetConnMaxLifetime 设置了连接可复用的最大时间。
+			sqlDB.SetConnMaxLifetime(time.Hour)
+		}
 	}
 }
