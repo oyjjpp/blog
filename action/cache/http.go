@@ -2,6 +2,7 @@ package cache
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -10,7 +11,9 @@ import (
 func Http(ctx *gin.Context) {
 
 	var data interface{}
-	_ = json.Unmarshal([]byte(CACHE_DATA), &data)
+	if err := json.Unmarshal([]byte(CACHE_DATA), &data); err != nil {
+		log.Println(err.Error())
+	}
 
 	// 私有、共享
 	// Cache-Control: private
