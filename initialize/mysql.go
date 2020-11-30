@@ -28,7 +28,7 @@ func Mysql() {
 
 	// https://github.com/go-sql-driver/mysql#dsn-data-source-name
 	// dsn := "web:web1234!@#$@tcp(47.98.161.8:8004)/qmPlus?charset=utf8&parseTime=True&loc=Local"
-	dsn := "root:!QAZ2wsx@tcp(47.98.161.8:8004)/learn?charset=utf8&parseTime=True&loc=Local"
+	dsn := "web:web1234!@#$@tcp(47.98.161.8:8004)/learn?charset=utf8&parseTime=True&loc=Local"
 	if db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{Logger: newLogger}); err != nil {
 		// panic("failed to connect database")
 		os.Exit(0)

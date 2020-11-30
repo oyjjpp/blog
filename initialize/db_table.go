@@ -9,5 +9,6 @@ import (
 // 注册数据库表专用
 func DBTables() {
 	db := global.MysqlDB
-	db.AutoMigrate(models.SysUser{})
+	// db.AutoMigrate(models.SysUser{})
+	db.AutoMigrate(models.T{})
 }

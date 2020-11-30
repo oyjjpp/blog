@@ -64,22 +64,22 @@ func register(u *models.SysUser) (userInter *models.SysUser, err error) {
 func BatchCreate(ctx *gin.Context) {
 	// var users models.T
 	city := []string{"北京", "上海", "深圳", "重庆", "天津", "杭州"}
-	cityIndex := tool.Rand(0, 6)
+	cityIndex := tool.Rand(0, 5)
 
 	age := []int{20, 21, 22, 23, 24, 25, 26, 27, 28, 29}
-	ageIndex := tool.Rand(0, 10)
+	ageIndex := tool.Rand(0, 9)
 
 	name := []string{"赵括", "康熙", "朱元璋", "孔子", "老子", "李世民", "朱莉", "宋飞"}
-	nameIndex := tool.Rand(0, 8)
+	nameIndex := tool.Rand(0, 7)
 
 	users := make([]models.T, 100)
-	for i := 1; i <= 100; i++ {
+	for i := 0; i < 100; i++ {
 		users[i] = models.T{
-			Id:   i,
+			Id:   i + 1,
 			City: city[cityIndex],
-			Name: "杭州",
-			Age:  name[nameIndex],
-			Addr: "杭州",
+			Age:  age[ageIndex],
+			Name: name[nameIndex],
+			Addr: "",
 		}
 	}
 	data := global.MysqlDB.Create(&users)

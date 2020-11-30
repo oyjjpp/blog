@@ -2,6 +2,7 @@ package route
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/oyjjpp/blog/action/cache"
 	"github.com/oyjjpp/blog/action/detail"
 	"github.com/oyjjpp/blog/action/performance"
 	"github.com/oyjjpp/blog/action/section"
@@ -31,7 +32,9 @@ func LoadRoute(engine *gin.Engine) {
 		demoRouter.GET("/user/searchbykey", user.SearchByKey)
 		demoRouter.GET("/user/searchsbykey", user.SearchSByKey)
 		demoRouter.GET("/user/searchwhere", user.SearchWhere)
-
 		demoRouter.GET("/user/batchcreate", user.BatchCreate)
+
+		// cache
+		demoRouter.GET("/cache/http", cache.Http)
 	}
 }
