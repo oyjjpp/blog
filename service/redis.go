@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"blog/util/lib"
+	"github.com/oyjjpp/blog/util/lib"
 
 	"github.com/gomodule/redigo/redis"
 )

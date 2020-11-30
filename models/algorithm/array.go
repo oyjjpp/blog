@@ -1,9 +1,6 @@
 //数组常见相关算法
 package algorithm
 
-import (
-	"blog/models"
-)
 
 //长度最小的子数组
 func MinSubArrayLen(s int, nums []int) int {
@@ -72,13 +69,13 @@ func TwoSum(numbers []int, target int) []int {
 //给定长度为 2n 的数组, 你的任务是将这些数分成 n 对, 例如 (a1, b1), (a2, b2), ..., (an, bn) ，使得从1 到 n 的 min(ai, bi) 总和最大。
 //解题思路：数组排序，连续两个为一组，即可计算出最大的和
 func ArrayPairSum(nums []int) int {
-    mem := models.QuikcSort(nums)
+    mem := QuikcSort(nums)
 	rs := 0
 	for i := 0; i < len(mem); i = i + 2 {
 		rs = rs + mem[i]
 	}
 	return rs
-}  
+}
 //反转数组中的元素
 //双指针技巧使用场景
 func ReverseArray(mem []int) []int {
@@ -268,7 +265,7 @@ func DominantIndex(nums []int) int {
 		return 0
 	}
 
-	
+
 	rs := false
 	for i := 0; i < numsLen; i++ {
 		for j := 0; j < numsLen; j++ {

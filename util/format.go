@@ -1,10 +1,10 @@
 package util
 
-import(
+import (
 	"encoding/json"
+	"errors"
 	"reflect"
 	"strconv"
-	"errors"
 )
 
 //@desc interface转换为整形

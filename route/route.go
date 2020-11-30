@@ -31,5 +31,7 @@ func LoadRoute(engine *gin.Engine) {
 		demoRouter.GET("/user/searchbykey", user.SearchByKey)
 		demoRouter.GET("/user/searchsbykey", user.SearchSByKey)
 		demoRouter.GET("/user/searchwhere", user.SearchWhere)
+
+		demoRouter.GET("/user/batchcreate", user.BatchCreate)
 	}
 }

@@ -1,5 +1,5 @@
 //算法
-package models
+package algorithm
 
 //@link 排序算法 https://juejin.im/post/5a08cc646fb9a045030f9174
 
