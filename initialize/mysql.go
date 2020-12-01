@@ -34,7 +34,10 @@ func Mysql() {
 		os.Exit(0)
 	} else {
 		global.MysqlDB = db
-
+        
+        // 设置表名为非负数形式
+        // global.MysqlDB.SingularTable(true)
+        
 		// 设置连接池
 		if sqlDB, err := global.MysqlDB.DB(); err == nil {
 			// SetMaxIdleConns 设置空闲连接池中连接的最大数量

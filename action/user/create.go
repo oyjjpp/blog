@@ -63,26 +63,28 @@ func register(u *models.SysUser) (userInter *models.SysUser, err error) {
 // 批量添加
 func BatchCreate(ctx *gin.Context) {
 	// var users models.T
-	city := []string{"北京", "上海", "深圳", "重庆", "天津", "杭州"}
-	cityIndex := tool.Rand(0, 5)
+	city := []string{"哈尔宾", "长春", "沈阳", "大连", "石家庄", "杭州","济南","太原","郑州","广州","海南","西安","大同"}
 
 	age := []int{20, 21, 22, 23, 24, 25, 26, 27, 28, 29}
-	ageIndex := tool.Rand(0, 9)
 
-	name := []string{"赵括", "康熙", "朱元璋", "孔子", "老子", "李世民", "朱莉", "宋飞"}
-	nameIndex := tool.Rand(0, 7)
-
-	users := make([]models.T, 100)
-	for i := 0; i < 100; i++ {
-		users[i] = models.T{
+	name := []string{"龙与", "雪迎", "赵启慧", "妮子", "如男", "高飞", "果类", "迎非"}
+	
+	users := make([]models.T,0, 25000)
+	for i := 5000; i < 25000; i++ {
+        cityIndex := tool.Rand(0, 12)
+        ageIndex := tool.Rand(0, 9)
+        nameIndex := tool.Rand(0, 7)
+        
+		userInfo := models.T{
 			Id:   i + 1,
 			City: city[cityIndex],
 			Age:  age[ageIndex],
 			Name: name[nameIndex],
 			Addr: "",
 		}
+        users = append(users, userInfo)
 	}
-	data := global.MysqlDB.Create(&users)
+	data := global.MysqlDB.Table("t").Create(&users)
 	if errors.Is(data.Error, gorm.ErrRecordNotFound) {
 		ctx.JSON(http.StatusOK, map[string]interface{}{
 			"code": 500204,
