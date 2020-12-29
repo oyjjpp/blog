@@ -457,7 +457,7 @@ var CACHE_DATA string = `{
 			"is_collect": false
 		  }
 		}
-	  },
+	  }
 	],
 	"cursor": "eyJ2IjoiNjkwMDY5ODgxNDA5MzQ1OTQ2MyIsImkiOjgwfQ==",
 	"count": 41529,

@@ -31,7 +31,7 @@ func Http(ctx *gin.Context) {
 	// Cache-Control: must-revalidate
 
 	// Cache-Control:no-cache,no-store, must-revalidate
-	ctx.Header("Cache-Control", "no-cache,max-age=604800")
+	ctx.Header("Cache-Control", "public,max-age=604800")
 	ctx.JSON(http.StatusOK, map[string]interface{}{
 		"code": 0,
 		"msg":  "success",
