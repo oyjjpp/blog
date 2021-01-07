@@ -15,10 +15,11 @@ import (
 	"github.com/oyjjpp/blog/global"
 	"github.com/oyjjpp/blog/initialize"
 	"github.com/oyjjpp/blog/middleware"
+	"github.com/oyjjpp/blog/middleware/gzip"
 	"github.com/oyjjpp/blog/route"
 )
 
-func main() {
+func initDb() {
 	// 初始化数据库
 	initialize.Mysql()
 	initialize.DBTables()
@@ -30,7 +31,9 @@ func main() {
 			sqlDB.Close()
 		}
 	}()
+}
 
+func main() {
 	// 注册TCP服务
 	ginCreate()
 }
@@ -47,6 +50,8 @@ func ginCreate() {
 	handler.Use(middleware.Logger())
 	// handler.Use(gin.Recovery())
 
+	// 注册gzip中间件
+	handler.Use(gzip.Gzip(gzip.DefaultCompression))
 	// 注册路由
 	route.LoadRoute(handler)
 	// 注册性能分析
