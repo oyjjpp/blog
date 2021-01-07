@@ -2,8 +2,6 @@ package crypto
 
 import (
 	"testing"
-
-	"github.com/oyjjpp/blog/util/constant"
 )
 
 const (
@@ -27,4 +25,3 @@ func TestSha(t *testing.T) {
 	t.Log(res)
 	t.Log(len(res))
 }
-
