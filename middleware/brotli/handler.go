@@ -2,7 +2,6 @@ package brotli
 
 import (
 	"bufio"
-	"fmt"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -44,11 +43,12 @@ type Handler struct {
 }
 
 func NewHandler(config Config) *Handler {
+	// 设置压缩等级不符合则，使用默认等级
 	if config.CompressionLevel < BestSpeed || config.CompressionLevel > BestCompression {
-		panic(fmt.Sprintf("brotli: invalid CompressionLevel: %d", config.CompressionLevel))
+		config.CompressionLevel = DefaultCompression
 	}
 	if config.MinContentLength <= 0 {
-		panic(fmt.Sprintf("brotli: invalid MinContentLength: %d", config.MinContentLength))
+		config.MinContentLength = DefalutContentLen
 	}
 
 	handler := Handler{
