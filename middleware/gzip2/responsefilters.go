@@ -3,6 +3,7 @@ package gzip2
 import (
 	"log"
 	"net/http"
+	"strings"
 )
 
 // ResponseHeaderFilter decide whether or not to compress response
@@ -56,7 +57,7 @@ func (e *ContentTypeFilter) ShouldCompress(header http.Header) bool {
 	}
 
 	for _, item := range e.contentType {
-		if item == contentType {
+		if strings.Contains(contentType, item) {
 			return true
 		}
 	}
