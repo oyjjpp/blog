@@ -15,7 +15,7 @@ import (
 	"github.com/oyjjpp/blog/global"
 	"github.com/oyjjpp/blog/initialize"
 	"github.com/oyjjpp/blog/middleware"
-	"github.com/oyjjpp/blog/middleware/gzip2"
+	"github.com/oyjjpp/blog/middleware/brotli"
 	"github.com/oyjjpp/blog/route"
 )
 
@@ -52,7 +52,8 @@ func ginCreate() {
 
 	// 注册gzip中间件
 	// handler.Use(gzip.Gzip(gzip.DefaultCompression))
-	handler.Use(gzip2.DefaultHandler().Gin)
+	// handler.Use(gzip2.DefaultHandler().Gin)
+	handler.Use(brotli.DefaultHandler().Gin)
 
 	// 注册路由
 	route.LoadRoute(handler)
