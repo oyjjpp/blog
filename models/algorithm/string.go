@@ -87,7 +87,7 @@ func StrStr(haystack string, needle string) int {
 func AddBinary(a, b string) string {
 	strAlen := utf8.RuneCountInString(a)
 	strBlen := utf8.RuneCountInString(b)
-	if strBlen == 0 && strBlen == 0 {
+	if strBlen == 0 {
 		return ""
 	}
 
