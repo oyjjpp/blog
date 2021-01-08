@@ -36,5 +36,18 @@ func LoadRoute(engine *gin.Engine) {
 
 		// cache
 		demoRouter.GET("/cache/http", cache.Http)
+
+		// http状态码
+		demoRouter.GET("/api/error", blogError)
+		demoRouter.GET("/api/redirect", blogRedirect)
 	}
+}
+
+func blogError(ctx *gin.Context) {
+	// ctx.Status(401)
+	ctx.String(401, "%s", "请认证后访问")
+}
+
+func blogRedirect(ctx *gin.Context) {
+	ctx.Redirect(301, "https://www.baidu.com")
 }

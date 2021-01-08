@@ -18,17 +18,17 @@ type gzipHandler struct {
 }
 
 func newGzipHandler(level int, options ...Option) *gzipHandler {
-	var gzPool sync.Pool
-	gzPool.New = func() interface{} {
-		gz, err := gzip.NewWriterLevel(ioutil.Discard, level)
-		if err != nil {
-			panic(err)
-		}
-		return gz
-	}
 	handler := &gzipHandler{
 		Options: DefaultOptions,
-		gzPool:  gzPool,
+		gzPool: sync.Pool{
+			New: func() interface{} {
+				gz, err := gzip.NewWriterLevel(ioutil.Discard, level)
+				if err != nil {
+					panic(err)
+				}
+				return gz
+			},
+		},
 	}
 	for _, setter := range options {
 		setter(handler.Options)
@@ -48,11 +48,12 @@ func (g *gzipHandler) Handle(c *gin.Context) {
 	gz := g.gzPool.Get().(*gzip.Writer)
 	defer g.gzPool.Put(gz)
 	defer gz.Reset(ioutil.Discard)
-	// gz.Reset(c.Writer)
+	gz.Reset(c.Writer)
 
-	// c.Header("Content-Encoding", "gzip")
-	// c.Header("Vary", "Accept-Encoding")
+	c.Header("Content-Encoding", "gzip")
+	c.Header("Vary", "Accept-Encoding")
 	c.Writer = &gzipWriter{c.Writer, gz}
+
 	defer func() {
 		gz.Close()
 		c.Header("Content-Length", fmt.Sprint(c.Writer.Size()))

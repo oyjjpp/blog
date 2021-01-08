@@ -28,9 +28,9 @@ func (g *gzipWriter) WriteString(s string) (int, error) {
 }
 
 func (g *gzipWriter) Write(data []byte) (int, error) {
-	return g.ResponseWriter.Write(data)
-	// g.Header().Del("Content-Length")
-	// return g.writer.Write(data)
+	// return g.ResponseWriter.Write(data)
+	g.Header().Del("Content-Length")
+	return g.writer.Write(data)
 }
 
 // Fix: https://github.com/mholt/caddy/issues/38

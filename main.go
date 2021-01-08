@@ -15,7 +15,7 @@ import (
 	"github.com/oyjjpp/blog/global"
 	"github.com/oyjjpp/blog/initialize"
 	"github.com/oyjjpp/blog/middleware"
-	"github.com/oyjjpp/blog/middleware/gzip"
+	"github.com/oyjjpp/blog/middleware/gzip2"
 	"github.com/oyjjpp/blog/route"
 )
 
@@ -51,9 +51,12 @@ func ginCreate() {
 	// handler.Use(gin.Recovery())
 
 	// 注册gzip中间件
-	handler.Use(gzip.Gzip(gzip.DefaultCompression))
+	// handler.Use(gzip.Gzip(gzip.DefaultCompression))
+	handler.Use(gzip2.DefaultHandler().Gin)
+
 	// 注册路由
 	route.LoadRoute(handler)
+
 	// 注册性能分析
 	// pprof.Register(handler)
 

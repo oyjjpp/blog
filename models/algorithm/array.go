@@ -1,25 +1,14 @@
 //数组常见相关算法
 package algorithm
 
-
-//长度最小的子数组
-func MinSubArrayLen(s int, nums []int) int {
-	k:=0
-	for i:=0;i<nums;i++{
-
-	}
-	return k
-}
-
-
 //最大连续1的个数
 func FindMaxConsecutiveOnes(nums []int) int {
-	var rs ,temp int
-	for i:= 0; i< len(nums);i++{
+	var rs, temp int
+	for i := 0; i < len(nums); i++ {
 		if nums[i] == 1 {
 			temp++
-		}else{
-			if (temp > rs){
+		} else {
+			if temp > rs {
 				rs = temp
 			}
 			temp = 0
@@ -31,7 +20,6 @@ func FindMaxConsecutiveOnes(nums []int) int {
 	}
 	return rs
 }
-
 
 //移除元素
 //给定一个数组和一个值，原地删除该值的所有实例并返回新的长度
@@ -69,13 +57,14 @@ func TwoSum(numbers []int, target int) []int {
 //给定长度为 2n 的数组, 你的任务是将这些数分成 n 对, 例如 (a1, b1), (a2, b2), ..., (an, bn) ，使得从1 到 n 的 min(ai, bi) 总和最大。
 //解题思路：数组排序，连续两个为一组，即可计算出最大的和
 func ArrayPairSum(nums []int) int {
-    mem := QuikcSort(nums)
+	mem := QuikcSort(nums)
 	rs := 0
 	for i := 0; i < len(mem); i = i + 2 {
 		rs = rs + mem[i]
 	}
 	return rs
 }
+
 //反转数组中的元素
 //双指针技巧使用场景
 func ReverseArray(mem []int) []int {
@@ -261,10 +250,9 @@ func DominantIndex(nums []int) int {
 		return -1
 	}
 
-	if numsLen = 1{
+	if numsLen == 1 {
 		return 0
 	}
-
 
 	rs := false
 	for i := 0; i < numsLen; i++ {
@@ -288,7 +276,7 @@ func DominantIndex(nums []int) int {
 }
 
 //解题思路：遍历数组，找到最大值、次大值，最后进行比较
-func DominantIndexV2(nums []int) int{
+func DominantIndexV2(nums []int) int {
 	numsLen := len(nums)
 	if numsLen < 1 {
 		return -1
@@ -315,24 +303,24 @@ func DominantIndexV2(nums []int) int{
 }
 
 //解题思路 假设第一个为最大值
-func DominantIndexV3(nums []int) int{
+func DominantIndexV3(nums []int) int {
 	numsLen := len(nums)
-	if numsLen < 1{
+	if numsLen < 1 {
 		return -1
 	}
-	index :=0
+	index := 0
 	maxNum := nums[0]
 
-	for i:=1; i< numsLen;i++{
-		if maxNum >= (2*nums[1]) {
+	for i := 1; i < numsLen; i++ {
+		if maxNum >= (2 * nums[1]) {
 			continue
-		}else if nums[i] > (2*maxNum){
+		} else if nums[i] > (2 * maxNum) {
 			index = i
 			maxNum = nums[i]
-		}else if nums[i] > maxNum{
-			index =  -1
+		} else if nums[i] > maxNum {
+			index = -1
 			maxNum = nums[i]
-		}else{
+		} else {
 			index = -1
 		}
 	}
