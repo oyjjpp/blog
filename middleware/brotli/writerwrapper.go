@@ -9,44 +9,49 @@ import (
 	"github.com/andybalholm/brotli"
 )
 
-// writerWrapper wraps the originalHandler
-// to test whether to brotli and brotli the body if applicable.
 type writerWrapper struct {
-	// header filter are applied by its sequence
+	// 响应头过滤
 	Filters []ResponseHeaderFilter
-	// min content length to enable compress
+	// 响应长度
 	MinContentLength int64
-	OriginWriter     http.ResponseWriter
-	// use initBrotliWriter() to init brotliWriter when in need
+	// 原来数据
+	OriginWriter http.ResponseWriter
+	// 获取brotli writer
 	GetBrotliWriter func() *brotli.Writer
-	// must close brotli writer and put it back to pool
+	// 资源回收
 	PutBrotliWriter func(*brotli.Writer)
 
-	// internal below
-	// *** WARNING ***
-	// *writerWrapper.Reset() method must be updated
-	// upon following field changing
+	// **注意**
+	// 重置时候要重置以下字段
 
-	// compress or not
-	// default to true
+	// 是否开启压缩
 	shouldCompress bool
-	// whether body is large enough
+
+	// body是否足够大
 	bodyBigEnough bool
-	// is header already flushed?
-	headerFlushed         bool
+
+	// header是否已经设置
+	headerFlushed bool
+	// 响应头是否已经检查
 	responseHeaderChecked bool
-	statusCode            int
+	// 状态嘛
+	statusCode int
 	// how many raw bytes has been written
 	size         int
 	brotliWriter *brotli.Writer
 	bodyBuffer   []byte
 }
 
-// interface guard
-var _ http.ResponseWriter = (*writerWrapper)(nil)
-var _ http.Flusher = (*writerWrapper)(nil)
+// 接口验证
+var _ http.ResponseWriter = &writerWrapper{}
+var _ http.Flusher = &writerWrapper{}
 
-func newWriterWrapper(filters []ResponseHeaderFilter, minContentLength int64, originWriter http.ResponseWriter, getBrotliWriter func() *brotli.Writer, putBrotliWriter func(*brotli.Writer)) *writerWrapper {
+func newWriterWrapper(filters []ResponseHeaderFilter,
+	minContentLength int64,
+	originWriter http.ResponseWriter,
+	getBrotliWriter func() *brotli.Writer,
+	putBrotliWriter func(*brotli.Writer)) *writerWrapper {
+
 	return &writerWrapper{
 		shouldCompress:   true,
 		bodyBuffer:       make([]byte, 0, minContentLength),
@@ -99,6 +104,7 @@ func (w *writerWrapper) WriteHeaderCalled() bool {
 	return w.statusCode != 0
 }
 
+// initBrotliWriter 使用brotli初始化当前writer
 func (w *writerWrapper) initBrotliWriter() {
 	w.brotliWriter = w.GetBrotliWriter()
 	w.brotliWriter.Reset(w.OriginWriter)
@@ -128,6 +134,7 @@ func (w *writerWrapper) Write(data []byte) (int, error) {
 	if !w.responseHeaderChecked {
 		w.responseHeaderChecked = true
 
+		// 响应数据校验
 		header := w.Header()
 		for _, filter := range w.Filters {
 			w.shouldCompress = filter.ShouldCompress(header)
@@ -137,6 +144,7 @@ func (w *writerWrapper) Write(data []byte) (int, error) {
 			}
 		}
 
+		// 长度校验
 		if w.enoughContentLength() {
 			w.bodyBigEnough = true
 			w.WriteHeaderNow()
@@ -145,6 +153,7 @@ func (w *writerWrapper) Write(data []byte) (int, error) {
 		}
 	}
 
+	// TODO buffer用意？
 	if !w.writeBuffer(data) {
 		w.bodyBigEnough = true
 
@@ -168,7 +177,8 @@ func (w *writerWrapper) Write(data []byte) (int, error) {
 	return len(data), nil
 }
 
-func (w *writerWrapper) writeBuffer(data []byte) (fit bool) {
+// writeBuffer 数据写入buffer
+func (w *writerWrapper) writeBuffer(data []byte) bool {
 	if int64(len(data)+len(w.bodyBuffer)) > w.MinContentLength {
 		return false
 	}
@@ -177,6 +187,7 @@ func (w *writerWrapper) writeBuffer(data []byte) (fit bool) {
 	return true
 }
 
+// enoughContentLength
 func (w *writerWrapper) enoughContentLength() bool {
 	contentLength, err := strconv.ParseInt(w.Header().Get("Content-Length"), 10, 64)
 	if err != nil {
@@ -212,6 +223,7 @@ func (w *writerWrapper) WriteHeader(statusCode int) {
 		return
 	}
 
+	// 204/304 状态不压缩
 	if statusCode == http.StatusNoContent ||
 		statusCode == http.StatusNotModified {
 		w.shouldCompress = false

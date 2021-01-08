@@ -53,7 +53,19 @@ func ginCreate() {
 	// 注册gzip中间件
 	// handler.Use(gzip.Gzip(gzip.DefaultCompression))
 	// handler.Use(gzip2.DefaultHandler().Gin)
-	handler.Use(brotli.DefaultHandler().Gin)
+	handler.Use(brotli.NewHandler(brotli.Config{
+		CompressionLevel: brotli.DefaultCompression,
+		MinContentLength: brotli.DefalutContentLen,
+		RequestFilter: []brotli.RequestFilter{
+			brotli.NewCommonRequestFilter(),
+			brotli.NewRequestApiFilter([]string{
+				"/blog/cache/http",
+			}),
+		},
+		ResponseHeaderFilter: []brotli.ResponseHeaderFilter{
+			brotli.DefaultContentTypeFilter(),
+		},
+	}).Gin)
 
 	// 注册路由
 	route.LoadRoute(handler)

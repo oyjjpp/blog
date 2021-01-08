@@ -12,12 +12,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// "github.com/andybalholm/brotli"
-// These constants are copied from the brotli package
 const (
 	BestSpeed          = brotli.BestSpeed
 	BestCompression    = brotli.BestCompression
 	DefaultCompression = brotli.DefaultCompression
+	DefalutContentLen  = 1024
 )
 
 // Config is used in Handler initialization
@@ -34,7 +33,7 @@ type Config struct {
 	ResponseHeaderFilter []ResponseHeaderFilter
 }
 
-// Handler implement brotli compression for gin and net/http
+// Handler implement brotli compression for gin
 type Handler struct {
 	compressionLevel     int
 	minContentLength     int64
@@ -44,9 +43,6 @@ type Handler struct {
 	wrapperPool          sync.Pool
 }
 
-// NewHandler initialized a costumed brotli handler to take care of response compression.
-//
-// config must not be modified after calling on NewHandler()
 func NewHandler(config Config) *Handler {
 	if config.CompressionLevel < BestSpeed || config.CompressionLevel > BestCompression {
 		panic(fmt.Sprintf("brotli: invalid CompressionLevel: %d", config.CompressionLevel))
@@ -62,6 +58,7 @@ func NewHandler(config Config) *Handler {
 		responseHeaderFilter: config.ResponseHeaderFilter,
 	}
 
+	// brotli writer
 	handler.brotliWriterPool.New = func() interface{} {
 		return brotli.NewWriterLevel(ioutil.Discard, handler.compressionLevel)
 	}
@@ -74,14 +71,12 @@ func NewHandler(config Config) *Handler {
 
 // 默认配置
 var defaultConfig = Config{
-	CompressionLevel: 6,
-	MinContentLength: 1 * 1024,
+	CompressionLevel: DefaultCompression,
+	MinContentLength: DefalutContentLen,
 	RequestFilter: []RequestFilter{
 		NewCommonRequestFilter(),
-		// DefaultExtensionFilter(),
 	},
 	ResponseHeaderFilter: []ResponseHeaderFilter{
-		// NewSkipCompressedFilter(),
 		DefaultContentTypeFilter(),
 	},
 }
@@ -116,6 +111,7 @@ func (h *Handler) putWriteWrapper(w *writerWrapper) {
 		return
 	}
 
+	// 回收资源
 	w.FinishWriting()
 	w.OriginWriter = nil
 	h.wrapperPool.Put(w)
@@ -131,8 +127,8 @@ type ginBrotliWriter struct {
 	originWriter gin.ResponseWriter
 }
 
-// interface guard
-var _ gin.ResponseWriter = (*ginBrotliWriter)(nil)
+// 校验接口是否被实现
+var _ gin.ResponseWriter = &ginBrotliWriter{}
 
 func (g *ginBrotliWriter) WriteHeaderNow() {
 	g.wrapper.WriteHeaderNow()
@@ -192,7 +188,7 @@ func (g *ginBrotliWriter) Flush() {
 func (h *Handler) Gin(ctx *gin.Context) {
 	var shouldCompress = true
 
-	// 校验是否进行压缩
+	// 根据请求信息校验是否进行压缩
 	for _, filter := range h.requestFilter {
 		shouldCompress = filter.ShouldCompress(ctx.Request)
 		if !shouldCompress {
@@ -203,6 +199,7 @@ func (h *Handler) Gin(ctx *gin.Context) {
 	if shouldCompress {
 		wrapper := h.getWriteWrapper()
 		wrapper.Reset(ctx.Writer)
+
 		originWriter := ctx.Writer
 		ctx.Writer = &ginBrotliWriter{
 			originWriter: ctx.Writer,

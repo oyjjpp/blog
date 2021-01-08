@@ -1,20 +1,16 @@
 package brotli
 
 import (
-	"log"
 	"net/http"
 	"strings"
 )
 
-// ResponseHeaderFilter decide whether or not to compress response
-// judging by response header
+// 根据响应进行过滤
 type ResponseHeaderFilter interface {
-	// ShouldCompress decide whether or not to compress response,
-	// judging by response header
 	ShouldCompress(header http.Header) bool
 }
 
-// interface guards
+// 校验接口是否被实现
 var (
 	_ ResponseHeaderFilter = (*SkipCompressedFilter)(nil)
 	_ ResponseHeaderFilter = (*ContentTypeFilter)(nil)
@@ -36,9 +32,7 @@ func (s *SkipCompressedFilter) ShouldCompress(header http.Header) bool {
 	return header.Get("Content-Encoding") == "" && header.Get("Transfer-Encoding") == ""
 }
 
-// ContentTypeFilter judge via the response content type
-//
-// Omit this filter if you want to compress all content type.
+// ContentTypeFilter 响应类型是否支持压缩
 type ContentTypeFilter struct {
 	contentType []string
 }
@@ -51,7 +45,6 @@ func NewContentTypeFilter(types []string) *ContentTypeFilter {
 // ShouldCompress implements RequestFilter interface
 func (e *ContentTypeFilter) ShouldCompress(header http.Header) bool {
 	contentType := header.Get("Content-Type")
-	log.Println("contentType", contentType)
 	if contentType == "" {
 		return false
 	}
@@ -64,12 +57,17 @@ func (e *ContentTypeFilter) ShouldCompress(header http.Header) bool {
 	return false
 }
 
-// defaultContentType is the list of default content types for which to enable brotli.
-// original source:
-// https://support.cloudflare.com/hc/en-us/articles/200168396-What-will-Cloudflare-compress-
-var defaultContentType = []string{"text/html", "text/richtext", "text/plain", "text/css", "text/x-script", "text/x-component", "text/x-java-source", "text/x-markdown", "application/javascript", "application/x-javascript", "text/javascript", "text/js", "image/x-icon", "application/x-perl", "application/x-httpd-cgi", "text/xml", "application/xml", "application/xml+rss", "application/json", "multipart/bag", "multipart/mixed", "application/xhtml+xml", "font/ttf", "font/otf", "font/x-woff", "image/svg+xml", "application/vnd.ms-fontobject", "application/ttf", "application/x-ttf", "application/otf", "application/x-otf", "application/truetype", "application/opentype", "application/x-opentype", "application/font-woff", "application/eot", "application/font", "application/font-sfnt", "application/wasm"}
+// defaultContentType
+var defaultContentType = []string{
+	"text/plain",
+	"application/x-javascript",
+	"application/javascript",
+	"application/json",
+	"text/css",
+	"application/xml",
+}
 
-// DefaultContentTypeFilter permits
+// DefaultContentTypeFilter
 func DefaultContentTypeFilter() *ContentTypeFilter {
 	return NewContentTypeFilter(defaultContentType)
 }

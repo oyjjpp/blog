@@ -5,16 +5,15 @@ import (
 	"strings"
 )
 
-// RequestFilter decide whether or not to compress response judging by request
+// RequestFilter 请求过滤
 type RequestFilter interface {
-	// ShouldCompress decide whether or not to compress response,
-	// judging by request
 	ShouldCompress(req *http.Request) bool
 }
 
-// interface guards
+// 校验接口是否被实现
 var (
-	_ RequestFilter = (*CommonRequestFilter)(nil)
+	_ RequestFilter = &CommonRequestFilter{}
+	_ RequestFilter = &RequestApiFilter{}
 )
 
 // CommonRequestFilter judge via common easy criteria like
@@ -32,4 +31,25 @@ func (c *CommonRequestFilter) ShouldCompress(req *http.Request) bool {
 		req.Method != http.MethodOptions &&
 		req.Header.Get("Upgrade") == "" &&
 		strings.Contains(req.Header.Get("Accept-Encoding"), "br")
+}
+
+type RequestApiFilter struct {
+	path []string
+}
+
+func NewRequestApiFilter(path []string) *RequestApiFilter {
+	return &RequestApiFilter{path: path}
+}
+
+func (r *RequestApiFilter) ShouldCompress(req *http.Request) bool {
+	if len(r.path) == 0 {
+		return true
+	}
+	curPath := req.RequestURI
+	for _, item := range r.path {
+		if item == curPath {
+			return true
+		}
+	}
+	return false
 }
