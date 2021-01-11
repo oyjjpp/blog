@@ -5,12 +5,12 @@ import (
 	"strings"
 )
 
-// 根据响应进行过滤
+// Response filter conditions
 type ResponseHeaderFilter interface {
 	ShouldCompress(header http.Header) bool
 }
 
-// 校验接口是否被实现
+// interface verification
 var (
 	_ ResponseHeaderFilter = (*SkipCompressedFilter)(nil)
 	_ ResponseHeaderFilter = (*ContentTypeFilter)(nil)
@@ -32,7 +32,7 @@ func (s *SkipCompressedFilter) ShouldCompress(header http.Header) bool {
 	return header.Get("Content-Encoding") == "" && header.Get("Transfer-Encoding") == ""
 }
 
-// ContentTypeFilter 响应类型是否支持压缩
+// ContentTypeFilter
 type ContentTypeFilter struct {
 	contentType []string
 }

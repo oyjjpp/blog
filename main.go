@@ -60,6 +60,7 @@ func ginCreate() {
 			brotli.NewCommonRequestFilter(),
 			brotli.NewRequestApiFilter([]string{
 				"/blog/cache/http",
+				"/blog/detail/index",
 			}),
 		},
 		ResponseHeaderFilter: []brotli.ResponseHeaderFilter{

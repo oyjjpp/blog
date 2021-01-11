@@ -3,46 +3,29 @@ package brotli
 import (
 	"fmt"
 	"net/http"
-	"strconv"
 	"strings"
 
 	"github.com/andybalholm/brotli"
 )
 
 type writerWrapper struct {
-	// 响应头过滤
-	Filters []ResponseHeaderFilter
-	// 响应长度
+	Filters          []ResponseHeaderFilter
 	MinContentLength int64
-	// 原来数据
-	OriginWriter http.ResponseWriter
-	// 获取brotli writer
-	GetBrotliWriter func() *brotli.Writer
-	// 资源回收
-	PutBrotliWriter func(*brotli.Writer)
+	OriginWriter     http.ResponseWriter
+	brotliWriter     *brotli.Writer
+	GetBrotliWriter  func() *brotli.Writer
+	PutBrotliWriter  func(*brotli.Writer)
 
-	// **注意**
-	// 重置时候要重置以下字段
-
-	// 是否开启压缩
-	shouldCompress bool
-
-	// body是否足够大
-	bodyBigEnough bool
-
-	// header是否已经设置
-	headerFlushed bool
-	// 响应头是否已经检查
+	shouldCompress        bool
+	bodyBigEnough         bool
+	headerFlushed         bool
 	responseHeaderChecked bool
-	// 状态嘛
-	statusCode int
-	// how many raw bytes has been written
-	size         int
-	brotliWriter *brotli.Writer
-	bodyBuffer   []byte
+	statusCode            int
+	size                  int
+	bodyBuffer            []byte
 }
 
-// 接口验证
+// interface verification
 var _ http.ResponseWriter = &writerWrapper{}
 var _ http.Flusher = &writerWrapper{}
 
@@ -88,14 +71,17 @@ func (w *writerWrapper) Reset(originWriter http.ResponseWriter) {
 	}
 }
 
+// Status implement the gin.ResponseWriter interface.
 func (w *writerWrapper) Status() int {
 	return w.statusCode
 }
 
+// Size implement the gin.ResponseWriter interface.
 func (w *writerWrapper) Size() int {
 	return w.size
 }
 
+// Written implement the gin.ResponseWriter interface.
 func (w *writerWrapper) Written() bool {
 	return w.headerFlushed || len(w.bodyBuffer) > 0
 }
@@ -104,18 +90,18 @@ func (w *writerWrapper) WriteHeaderCalled() bool {
 	return w.statusCode != 0
 }
 
-// initBrotliWriter 使用brotli初始化当前writer
+// initBrotliWriter
 func (w *writerWrapper) initBrotliWriter() {
 	w.brotliWriter = w.GetBrotliWriter()
 	w.brotliWriter.Reset(w.OriginWriter)
 }
 
-// Header implements http.ResponseWriter
+// Header implements the http.ResponseWriter interface.
 func (w *writerWrapper) Header() http.Header {
 	return w.OriginWriter.Header()
 }
 
-// Write implements http.ResponseWriter
+// Write implements the http.ResponseWriter interface.
 func (w *writerWrapper) Write(data []byte) (int, error) {
 	w.size += len(data)
 
@@ -143,17 +129,9 @@ func (w *writerWrapper) Write(data []byte) (int, error) {
 				return w.OriginWriter.Write(data)
 			}
 		}
-
-		// 长度校验
-		if w.enoughContentLength() {
-			w.bodyBigEnough = true
-			w.WriteHeaderNow()
-			w.initBrotliWriter()
-			return w.brotliWriter.Write(data)
-		}
 	}
 
-	// TODO buffer用意？
+	// check buffer length
 	if !w.writeBuffer(data) {
 		w.bodyBigEnough = true
 
@@ -177,7 +155,7 @@ func (w *writerWrapper) Write(data []byte) (int, error) {
 	return len(data), nil
 }
 
-// writeBuffer 数据写入buffer
+// writeBuffer
 func (w *writerWrapper) writeBuffer(data []byte) bool {
 	if int64(len(data)+len(w.bodyBuffer)) > w.MinContentLength {
 		return false
@@ -187,20 +165,7 @@ func (w *writerWrapper) writeBuffer(data []byte) bool {
 	return true
 }
 
-// enoughContentLength
-func (w *writerWrapper) enoughContentLength() bool {
-	contentLength, err := strconv.ParseInt(w.Header().Get("Content-Length"), 10, 64)
-	if err != nil {
-		return false
-	}
-	if contentLength != 0 && contentLength >= w.MinContentLength {
-		return true
-	}
-
-	return false
-}
-
-// WriteHeader implements http.ResponseWriter
+// WriteHeader implements the http.ResponseWriter interface.
 //
 // WriteHeader does not really calls originalHandler's WriteHeader,
 // and the calling will actually be handler by WriteHeaderNow().
@@ -210,7 +175,7 @@ func (w *writerWrapper) enoughContentLength() bool {
 // conflicting between http and gin's implementation.
 // Here, brotli consider second(and furthermore) calls to WriteHeader()
 // valid. WriteHeader() is disabled after flushing header.
-// Do note setting status code to 204 or 304 marks content uncompressable,
+// Do note setting status not 200 marks content uncompressable,
 // and a later status code change does not revert this.
 func (w *writerWrapper) WriteHeader(statusCode int) {
 	if w.headerFlushed {
@@ -223,14 +188,13 @@ func (w *writerWrapper) WriteHeader(statusCode int) {
 		return
 	}
 
-	// 204/304 状态不压缩
-	if statusCode == http.StatusNoContent ||
-		statusCode == http.StatusNotModified {
+	if statusCode != http.StatusOK {
 		w.shouldCompress = false
 		return
 	}
 }
 
+// WriteHeaderNow implement the gin.ResponseWriter interface.
 // WriteHeaderNow Forces to write the http header (status code + headers).
 //
 // WriteHeaderNow must always be called and called after
@@ -260,6 +224,7 @@ func (w *writerWrapper) WriteHeaderNow() {
 		}
 	}
 
+	// write http status
 	w.OriginWriter.WriteHeader(w.statusCode)
 
 	w.headerFlushed = true
@@ -286,7 +251,7 @@ func (w *writerWrapper) FinishWriting() {
 	}
 }
 
-// Flush implements http.Flusher
+// Flush implements the http.Flusher interface.
 func (w *writerWrapper) Flush() {
 	w.FinishWriting()
 

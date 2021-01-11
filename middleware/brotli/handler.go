@@ -21,8 +21,6 @@ const (
 // Config is used in Handler initialization
 type Config struct {
 	// 压缩等级
-	// 可选择的值: 0 => 11.
-	// see https://pkg.go.dev/github.com/andybalholm/brotli#pkg-constants
 	CompressionLevel int
 	// 响应内容长度
 	MinContentLength int64
@@ -47,6 +45,7 @@ func NewHandler(config Config) *Handler {
 	if config.CompressionLevel < BestSpeed || config.CompressionLevel > BestCompression {
 		config.CompressionLevel = DefaultCompression
 	}
+	// 设置默认压缩长度限制
 	if config.MinContentLength <= 0 {
 		config.MinContentLength = DefalutContentLen
 	}
@@ -63,7 +62,11 @@ func NewHandler(config Config) *Handler {
 		return brotli.NewWriterLevel(ioutil.Discard, handler.compressionLevel)
 	}
 	handler.wrapperPool.New = func() interface{} {
-		return newWriterWrapper(handler.responseHeaderFilter, handler.minContentLength, nil, handler.getBrotliWriter, handler.putBrotliWriter)
+		return newWriterWrapper(handler.responseHeaderFilter,
+			handler.minContentLength,
+			nil,
+			handler.getBrotliWriter,
+			handler.putBrotliWriter)
 	}
 
 	return &handler
@@ -91,7 +94,7 @@ func (h *Handler) getBrotliWriter() *brotli.Writer {
 	return h.brotliWriterPool.Get().(*brotli.Writer)
 }
 
-// putBrotliWriter 回收BrotliWriter
+// putBrotliWriter 回收brotli writer
 func (h *Handler) putBrotliWriter(w *brotli.Writer) {
 	if w == nil {
 		return
@@ -102,10 +105,12 @@ func (h *Handler) putBrotliWriter(w *brotli.Writer) {
 	h.brotliWriterPool.Put(w)
 }
 
+// getWriteWrapper 获取Wrapper
 func (h *Handler) getWriteWrapper() *writerWrapper {
 	return h.wrapperPool.Get().(*writerWrapper)
 }
 
+// putWriteWrapper
 func (h *Handler) putWriteWrapper(w *writerWrapper) {
 	if w == nil {
 		return
@@ -117,69 +122,70 @@ func (h *Handler) putWriteWrapper(w *writerWrapper) {
 	h.wrapperPool.Put(w)
 }
 
-type ginGzipWriter struct {
-	wrapper      *writerWrapper
-	originWriter gin.ResponseWriter
-}
-
 type ginBrotliWriter struct {
 	wrapper      *writerWrapper
 	originWriter gin.ResponseWriter
 }
 
-// 校验接口是否被实现
+// interface verification
 var _ gin.ResponseWriter = &ginBrotliWriter{}
 
+// WriteHeaderNow implement the gin.ResponseWriter interface.
 func (g *ginBrotliWriter) WriteHeaderNow() {
 	g.wrapper.WriteHeaderNow()
 }
 
+// Hijack implements the http.Hijacker interface.
 func (g *ginBrotliWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
 	return g.originWriter.Hijack()
 }
 
+// CloseNotify implements the http.CloseNotify interface.
 func (g *ginBrotliWriter) CloseNotify() <-chan bool {
 	return g.originWriter.CloseNotify()
 }
 
+// Status implement the gin.ResponseWriter interface.
 func (g *ginBrotliWriter) Status() int {
 	return g.wrapper.Status()
 }
 
+// Size implement the gin.ResponseWriter interface.
 func (g *ginBrotliWriter) Size() int {
 	return g.wrapper.Size()
 }
 
+// Written implement the gin.ResponseWriter interface.
 func (g *ginBrotliWriter) Written() bool {
 	return g.wrapper.Written()
 }
 
+// Pusher implement the gin.ResponseWriter interface.
 func (g *ginBrotliWriter) Pusher() http.Pusher {
-	// TODO: not sure how to implement gzip for HTTP2
-	return nil
+	return g.originWriter.Pusher()
 }
 
-// WriteString implements interface gin.ResponseWriter
+// WriteString implements the gin.ResponseWriter interface.
 func (g *ginBrotliWriter) WriteString(s string) (int, error) {
 	return g.wrapper.Write([]byte(s))
 }
 
-// Write implements interface gin.ResponseWriter
+// Write implements the http.ResponseWriter interface.
 func (g *ginBrotliWriter) Write(data []byte) (int, error) {
 	return g.wrapper.Write(data)
 }
 
-// WriteHeader implements interface gin.ResponseWriter
+// WriteHeader implements the http.ResponseWriter interface.
 func (g *ginBrotliWriter) WriteHeader(code int) {
 	g.wrapper.WriteHeader(code)
 }
 
-// WriteHeader implements interface gin.ResponseWriter
+// Header implements the http.ResponseWriter interface.
 func (g *ginBrotliWriter) Header() http.Header {
 	return g.wrapper.Header()
 }
 
-// Flush implements http.Flusher
+// Flush implements the http.Flusher interface.
 func (g *ginBrotliWriter) Flush() {
 	g.wrapper.Flush()
 }

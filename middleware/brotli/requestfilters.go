@@ -5,12 +5,12 @@ import (
 	"strings"
 )
 
-// RequestFilter 请求过滤
+// Request filter conditions
 type RequestFilter interface {
 	ShouldCompress(req *http.Request) bool
 }
 
-// 校验接口是否被实现
+// interface verification
 var (
 	_ RequestFilter = &CommonRequestFilter{}
 	_ RequestFilter = &RequestApiFilter{}
