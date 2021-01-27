@@ -10,12 +10,12 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/CodeLineage/brotli"
 	"github.com/fvbock/endless"
 	"github.com/gin-gonic/gin"
 	"github.com/oyjjpp/blog/global"
 	"github.com/oyjjpp/blog/initialize"
 	"github.com/oyjjpp/blog/middleware"
-	"github.com/oyjjpp/blog/middleware/brotli"
 	"github.com/oyjjpp/blog/route"
 )
 
