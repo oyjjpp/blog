@@ -5,7 +5,6 @@ go 1.13
 require (
 	github.com/CodeLineage/brotli v0.0.1
 	github.com/CodeLineage/tool v0.0.0-20201130030749-0606c9680f5b
-	github.com/andybalholm/brotli v1.0.1
 	github.com/fvbock/endless v0.0.0-20170109170031-447134032cb6
 	github.com/gin-gonic/gin v1.6.1
 	github.com/golang/protobuf v1.4.2
