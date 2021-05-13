@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/oyjjpp/blog/service/queue"
 	"log"
 	"net/http"
 	"os"
@@ -34,8 +35,18 @@ func initDb() {
 }
 
 func main() {
-	// 注册TCP服务
+	ctx, cancel := context.WithCancel(context.Background())
+	// 注册HTTP服务
 	ginCreate()
+
+	// 初始化kafka
+	queue.ProducerInit(ctx)
+
+	// 信号
+	exit := make(chan os.Signal, 1)
+	signal.Notify(exit, syscall.SIGHUP, syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT)
+	<-exit
+	cancel()
 }
 
 // ginCreate
@@ -75,7 +86,7 @@ func ginCreate() {
 	// pprof.Register(handler)
 
 	// 监听端口
-	handler.Run(":8091") // 监听并在 0.0.0.0:8080 上启动服务
+	handler.Run(":80") // 监听并在 0.0.0.0:8080 上启动服务
 }
 
 // endlessCreate

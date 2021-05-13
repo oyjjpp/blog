@@ -5,6 +5,7 @@ import (
 	"github.com/oyjjpp/blog/action/cache"
 	"github.com/oyjjpp/blog/action/detail"
 	"github.com/oyjjpp/blog/action/performance"
+	"github.com/oyjjpp/blog/action/queue"
 	"github.com/oyjjpp/blog/action/section"
 	"github.com/oyjjpp/blog/action/serialize"
 	"github.com/oyjjpp/blog/action/user"
@@ -40,6 +41,9 @@ func LoadRoute(engine *gin.Engine) {
 		// http状态码
 		demoRouter.GET("/api/error", blogError)
 		demoRouter.GET("/api/redirect", blogRedirect)
+
+		// mq
+		demoRouter.GET("/kafka/product", queue.Product)
 	}
 }
 
