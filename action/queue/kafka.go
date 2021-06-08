@@ -32,7 +32,7 @@ func Product(ctx *gin.Context) {
 	}
 
 	// 生产数据
-	queue.SendMessage("sun", form.Message)
+	queue.SendMessage("topic-study", form.Message)
 
 	ctx.JSON(http.StatusOK, res)
 }

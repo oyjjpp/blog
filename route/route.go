@@ -9,6 +9,7 @@ import (
 	"github.com/oyjjpp/blog/action/section"
 	"github.com/oyjjpp/blog/action/serialize"
 	"github.com/oyjjpp/blog/action/user"
+	"net/http"
 )
 
 func LoadRoute(engine *gin.Engine) {
@@ -44,6 +45,13 @@ func LoadRoute(engine *gin.Engine) {
 
 		// mq
 		demoRouter.GET("/kafka/product", queue.Product)
+
+		demoRouter.POST("/kafka/:productID/appID", func(ctx *gin.Context) {
+			productID := ctx.Param("productID")
+			ctx.JSON(http.StatusOK, gin.H{
+				"appId": productID,
+			})
+		})
 	}
 }
 

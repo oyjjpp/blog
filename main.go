@@ -36,17 +36,18 @@ func initDb() {
 
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
+	// 初始化kafka
+	log.Println("init kafka")
+	queue.ProducerInit(ctx)
 	// 注册HTTP服务
 	ginCreate()
-
-	// 初始化kafka
-	queue.ProducerInit(ctx)
 
 	// 信号
 	exit := make(chan os.Signal, 1)
 	signal.Notify(exit, syscall.SIGHUP, syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT)
 	<-exit
 	cancel()
+	queue.CloseKafka()
 }
 
 // ginCreate
