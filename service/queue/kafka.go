@@ -3,8 +3,11 @@ package queue
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/Shopify/sarama"
+	cluster "github.com/bsm/sarama-cluster"
 	"log"
+	"time"
 )
 
 type syncProducerPool struct {
@@ -13,6 +16,7 @@ type syncProducerPool struct {
 }
 
 var defaultProducer *syncProducerPool
+var brokerList = [...]string{"192.168.124.28:9092", "192.168.124.28:9093", "192.168.124.28:9094"}
 
 func ProducerInit(ctx context.Context) {
 
@@ -26,11 +30,14 @@ func ProducerInit(ctx context.Context) {
 	config.Producer.Partitioner = sarama.NewRandomPartitioner // 新选出一个partition
 	config.Producer.Return.Successes = true                   // 成功交付的消息将在success channel返回
 	config.Version = sarama.V0_10_2_0
-	//config.Producer.
+
+	config.ClientID = "1" // 设置客户端ID
+
+	//config.Producer.Retry =  // 重试次数
 
 	// 连接kafka
 	//logger.I("syncProducerPool.NewWorker.start", "Consumer:%v;", mkConst.WECHAT_EVENT_TOPIC)
-	client, err := sarama.NewSyncProducer([]string{"192.168.124.28:9092", "192.168.124.28:9093", "192.168.124.28:9094"}, config)
+	client, err := sarama.NewSyncProducer(brokerList[:], config)
 	if err != nil {
 		panic(err)
 	}
@@ -61,10 +68,63 @@ func SendMessage(topic string, message interface{}) error {
 		return err
 	}
 
+	// 定制分区
 	return nil
 }
 
 func CloseKafka() {
 	err := defaultProducer.client.Close()
 	log.Println(err)
+}
+
+func RunConsumer(ctx context.Context) {
+	//ctx := context.Background()
+	consumer := getKafkaConsumer(brokerList[:], []string{"topic-study"}, "topic-study_consumer")
+	for i := 0; i < 10; i++ {
+		go Run(ctx, consumer)
+	}
+}
+
+func Run(ctx context.Context, consumer *cluster.Consumer) {
+	for {
+		select {
+		case data, ok := <-consumer.Messages():
+			if !ok {
+				time.Sleep(10 * time.Second)
+				continue
+			}
+			//logger.Ix(ctx, "consume_message", "message:%s", string(data.Value))
+			//process(ctx, messageService, data.Value)
+
+			consumer.MarkOffset(data, "")
+		case <-ctx.Done():
+			fmt.Println("consume_message exit")
+			return
+		}
+	}
+}
+
+func getKafkaConsumer(brokerList, topicList []string, groupName string) *cluster.Consumer {
+	config := cluster.NewConfig()
+	config.Consumer.Return.Errors = true
+	config.Group.Return.Notifications = true
+
+	consumer, err := cluster.NewConsumer(brokerList, groupName, topicList, config)
+	if err != nil {
+		panic(err)
+	}
+
+	go func() {
+		for err := range consumer.Errors() {
+			fmt.Printf("get error:%v\n", err)
+		}
+	}()
+
+	go func() {
+		for ntf := range consumer.Notifications() {
+			fmt.Printf("get rebalanced notification:%v\n", ntf)
+		}
+	}()
+
+	return consumer
 }
