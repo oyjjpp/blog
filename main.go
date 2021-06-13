@@ -3,13 +3,14 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/oyjjpp/blog/service/queue"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/oyjjpp/blog/service/queue"
 
 	"github.com/CodeLineage/brotli"
 	"github.com/fvbock/endless"
@@ -39,6 +40,7 @@ func main() {
 	// 初始化kafka
 	log.Println("init kafka")
 	queue.ProducerInit(ctx)
+	queue.ConsumerInit(ctx)
 	// 注册HTTP服务
 	ginCreate()
 

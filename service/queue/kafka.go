@@ -4,10 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/Shopify/sarama"
-	cluster "github.com/bsm/sarama-cluster"
 	"log"
 	"time"
+
+	"github.com/Shopify/sarama"
+	cluster "github.com/bsm/sarama-cluster"
 )
 
 type syncProducerPool struct {
@@ -18,6 +19,7 @@ type syncProducerPool struct {
 var defaultProducer *syncProducerPool
 var brokerList = [...]string{"192.168.124.28:9092", "192.168.124.28:9093", "192.168.124.28:9094"}
 
+// kafka初始化
 func ProducerInit(ctx context.Context) {
 
 	log.Println("producer")
@@ -48,6 +50,7 @@ func ProducerInit(ctx context.Context) {
 	return
 }
 
+// kafka发送消息
 func SendMessage(topic string, message interface{}) error {
 	msg := sarama.ProducerMessage{}
 	msg.Topic = topic
@@ -59,10 +62,10 @@ func SendMessage(topic string, message interface{}) error {
 
 	log.Println(defaultProducer.client)
 
-	log.Printf("syncProducerPool.SendMessage begin to send message:%v", msg)
+	log.Printf("syncProducerPool.SendMessage begin to send message:%v \n", msg)
 
 	partition, offset, err := defaultProducer.client.SendMessage(&msg)
-	log.Printf("partition:%v offset:%d", partition, offset)
+	log.Printf("partition:%v offset:%d \n", partition, offset)
 	if err != nil {
 		log.Printf("syncProducerPool.SendMessage.fail msg;%v, error:%v", msg, err)
 		return err
@@ -72,6 +75,7 @@ func SendMessage(topic string, message interface{}) error {
 	return nil
 }
 
+// 关闭kafka连接
 func CloseKafka() {
 	err := defaultProducer.client.Close()
 	log.Println(err)
@@ -127,4 +131,10 @@ func getKafkaConsumer(brokerList, topicList []string, groupName string) *cluster
 	}()
 
 	return consumer
+}
+
+func Test() {
+	config := sarama.NewConfig()
+	config.Version = sarama.V0_10_2_0
+	config.Consumer.Offsets.Initial = sarama.OffsetOldest
 }
