@@ -12,7 +12,7 @@ type Consumer struct {
 	ctx context.Context
 }
 
-// 校验接口是否实现
+// 校验接口是否被实现
 var _ sarama.ConsumerGroupHandler = &Consumer{}
 
 func (consumer *Consumer) Setup(s sarama.ConsumerGroupSession) error {
@@ -24,16 +24,10 @@ func (consumer *Consumer) Cleanup(s sarama.ConsumerGroupSession) error {
 }
 
 func (consumer *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
-	// for msg := range claim.Messages() {
-	// 	message := string(msg.Value)
-	// 	consumer.handle(message)
-	// 	session.MarkMessage(msg, "")
-	// }
-	// return nil
-
 	for {
 		select {
 		case data, ok := <-claim.Messages():
+			log.Printf("ConsumeClaim data:%v,ok:%v \n", data, ok)
 			if !ok {
 				log.Printf("ConsumeClaim fail:%v \n", data)
 				time.Sleep(10 * time.Second)
@@ -49,21 +43,49 @@ func (consumer *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, clai
 	}
 }
 
+// 处理消息
 func (consumer *Consumer) handle(message string) {
 	log.Printf("consumer message:%v \n", message)
+}
+
+// 拦截器
+type DelayInterceptor struct {
+	ctx context.Context
+}
+
+var _ sarama.ConsumerInterceptor = &DelayInterceptor{}
+
+func (delay *DelayInterceptor) OnConsume(message *sarama.ConsumerMessage) {
+	// message.Timestamp
+	// message.Headers
 }
 
 // kafka消费者初始化
 func ConsumerInit(ctx context.Context) {
 	config := sarama.NewConfig()
 	config.Version = sarama.V0_10_2_0
+	config.Consumer.Return.Errors = true
 	config.Consumer.Offsets.Initial = sarama.OffsetOldest
+	// 拦截器
+	delay := new(DelayInterceptor)
+	config.Consumer.Interceptors = []sarama.ConsumerInterceptor{delay}
 
+	// 创建一个消费组
 	client, err := sarama.NewConsumerGroup(brokerList[:], "consumer_topic-study", config)
 	if err != nil {
 		log.Printf("ConsumerInit fail : %v\n", err)
 		panic(err)
 	}
+
+	// 资源回收
+	// defer func() { _ = client.Close() }()
+
+	// 打印异常
+	go func() {
+		for err := range client.Errors() {
+			log.Printf("ConsumerInit Consumer Group Err : %v\n", err)
+		}
+	}()
 
 	consumer := Consumer{ctx}
 	go func() {
@@ -73,6 +95,8 @@ func ConsumerInit(ctx context.Context) {
 				log.Printf("ConsumerInit Consume fail:%v \n", err)
 				time.Sleep(time.Second * 5)
 			}
+
+			log.Printf("ConsumerInit Consume")
 		}
 	}()
 }
