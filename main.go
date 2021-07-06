@@ -40,7 +40,7 @@ func main() {
 	// 初始化kafka
 	log.Println("init kafka")
 	queue.ProducerInit(ctx)
-	queue.ConsumerInit(ctx)
+	queue.ConsumerGroupInit(ctx)
 	// 注册HTTP服务
 	ginCreate()
 

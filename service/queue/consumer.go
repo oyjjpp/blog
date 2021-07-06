@@ -35,6 +35,8 @@ func (consumer *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, clai
 			}
 			message := string(data.Value)
 			consumer.handle(message)
+
+			// 提交消息 标记消息已经被消费
 			session.MarkMessage(data, "")
 		case <-consumer.ctx.Done():
 			log.Printf("ConsumeClaim consume_message exit")
@@ -60,13 +62,14 @@ func (delay *DelayInterceptor) OnConsume(message *sarama.ConsumerMessage) {
 	// message.Headers
 }
 
-// kafka消费者初始化
-func ConsumerInit(ctx context.Context) {
+// kafka消费组初始化
+func ConsumerGroupInit(ctx context.Context) {
 	config := sarama.NewConfig()
 	config.Version = sarama.V0_10_2_0
 	config.Consumer.Return.Errors = true
 	config.Consumer.Offsets.Initial = sarama.OffsetOldest
-	// 拦截器
+
+	// 注册拦截器
 	delay := new(DelayInterceptor)
 	config.Consumer.Interceptors = []sarama.ConsumerInterceptor{delay}
 
@@ -99,4 +102,32 @@ func ConsumerInit(ctx context.Context) {
 			log.Printf("ConsumerInit Consume")
 		}
 	}()
+}
+
+// kafka消费组初始化
+func ConsumerInit(ctx context.Context) {
+	config := sarama.NewConfig()
+	config.Version = sarama.V0_10_2_0
+	config.Consumer.Return.Errors = true
+	config.Consumer.Offsets.Initial = sarama.OffsetOldest
+
+	client, err := sarama.NewConsumer(brokerList[:], config)
+	if err != nil {
+		panic(err)
+	}
+
+	// 指定分区消费组
+	consume, err := client.ConsumePartition("topic-study", 0, sarama.OffsetNewest)
+	if err != nil {
+		panic(err)
+	}
+
+	for {
+		select {
+		case message := <-consume.Messages():
+			log.Println(message, message.Offset)
+		case <-ctx.Done():
+			return
+		}
+	}
 }

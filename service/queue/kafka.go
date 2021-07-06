@@ -59,6 +59,8 @@ func SendMessage(topic string, message interface{}) error {
 		return err
 	}
 	msg.Value = sarama.StringEncoder(strEi)
+	// 日志时间
+	msg.Timestamp = time.Now()
 
 	log.Println(defaultProducer.client)
 
