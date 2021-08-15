@@ -1,9 +1,10 @@
 package queue
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/oyjjpp/blog/service/queue"
-	"net/http"
 )
 
 type ProductReq struct {
