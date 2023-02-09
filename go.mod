@@ -9,7 +9,7 @@ require (
 	github.com/andybalholm/brotli v1.0.3 // indirect
 	github.com/bsm/sarama-cluster v2.1.15+incompatible
 	github.com/fvbock/endless v0.0.0-20170109170031-447134032cb6
-	github.com/gin-gonic/gin v1.7.2
+	github.com/gin-gonic/gin v1.7.7
 	github.com/go-playground/validator/v10 v10.6.1 // indirect
 	github.com/golang/protobuf v1.5.2
 	github.com/gomodule/redigo v2.0.0+incompatible
