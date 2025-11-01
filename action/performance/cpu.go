@@ -58,12 +58,12 @@ func RandomInt(min, max int) int {
 	return rand.Intn(max-min+1) + min
 }
 
-func calCount() {
-	timeInterval := time.Tick(time.Second)
-	for {
-		select {
-		case i := <-timeInterval:
-			Count = int64(i.Second())
-		}
-	}
-}
+// func calCount() {
+// 	timeInterval := time.Tick(time.Second)
+// 	for {
+// 		select {
+// 		case i := <-timeInterval:
+// 			Count = int64(i.Second())
+// 		}
+// 	}
+// }

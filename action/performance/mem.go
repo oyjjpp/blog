@@ -8,24 +8,23 @@ package performance
 
 import (
 	"bytes"
-	"fmt"
 	"strconv"
 	"strings"
 )
 
-func stringAdd() (str string) {
-	for i := 0; i < 20000; i++ {
-		str += strconv.Itoa(i)
-	}
-	return
-}
+// func stringAdd() (str string) {
+// 	for i := 0; i < 20000; i++ {
+// 		str += strconv.Itoa(i)
+// 	}
+// 	return
+// }
 
-func stringAddV2() (str string) {
-	for i := 0; i < 20000; i++ {
-		str = fmt.Sprintf("%s%d", str, i)
-	}
-	return
-}
+// func stringAddV2() (str string) {
+// 	for i := 0; i < 20000; i++ {
+// 		str = fmt.Sprintf("%s%d", str, i)
+// 	}
+// 	return
+// }
 
 func stringAddBuffer() string {
 	var str bytes.Buffer

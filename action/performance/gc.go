@@ -18,7 +18,7 @@ func GcData(ctx *gin.Context) {
 	var data = make(map[string]interface{})
 
 	if gcstats.NumGC > 0 {
-		elapsed := time.Now().Sub(appStartTime)
+		elapsed := time.Since(appStartTime)
 		overhead := float64(gcstats.PauseTotal) / float64(elapsed) * 100
 		data["numGC"] = gcstats.NumGC
 		data["pause"] = gcstats.Pause[0]
