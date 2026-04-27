@@ -6,6 +6,7 @@ toolchain go1.23.6
 
 require (
 	git.jiaxianghudong.com/ruixue/rxkit v1.0.103
+	github.com/bits-and-blooms/bloom/v3 v3.7.1
 	github.com/fsnotify/fsnotify v1.9.0
 	github.com/gin-gonic/gin v1.11.0
 	github.com/go-redis/redis/v8 v8.11.5
@@ -26,6 +27,7 @@ require (
 	git.jiaxianghudong.com/go/xlog v0.2.10 // indirect
 	git.jiaxianghudong.com/ruixue/consts v0.0.0-20240507110918-5c403a05ddbb // indirect
 	github.com/andybalholm/brotli v1.0.5 // indirect
+	github.com/bits-and-blooms/bitset v1.24.2 // indirect
 	github.com/bytedance/sonic v1.14.0 // indirect
 	github.com/bytedance/sonic/loader v0.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
